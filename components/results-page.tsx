@@ -7,8 +7,8 @@ import AdvancedFilters from "@/components/advanced-filters"
 import VehicleCard from "@/components/vehicle-card"
 import VehicleDetails from "@/components/vehicle-details"
 import { useUser } from "@/components/UserContext"
-import { getVehicles } from "@/lib/data"
-import type { Vehicle } from "@/types/vehicle"
+import { vehicleService } from "@/lib/vehicle-service"
+import type { Vehicle } from "@/lib/data"
 import { Search } from "lucide-react"
 
 export default function ResultsPage() {
@@ -42,12 +42,11 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetchAndSetVehicles = async () => {
       setLoading(true)
-      const { data, error } = await getVehicles()
+      const data = await vehicleService.getVehicles()
       if (data) {
         setAllVehicles(data)
-      }
-      if (error) {
-        console.error("Error fetching vehicles:", error)
+      } else {
+        console.error("Error fetching vehicles:")
       }
       setLoading(false)
     }

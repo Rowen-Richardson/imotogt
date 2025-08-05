@@ -27,11 +27,7 @@ export async function GET(request: NextRequest) {
 
     const result = await vehicleService.getVehicles(filters)
 
-    return NextResponse.json(result, {
-      headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-      },
-    })
+    return NextResponse.json(result)
   } catch (error) {
     console.error("API vehicles GET error:", error)
     return NextResponse.json(

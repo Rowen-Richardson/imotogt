@@ -82,6 +82,7 @@ export const vehicleService = {
         description: vehicleData.description,
         city: vehicleData.city,
         province: vehicleData.province,
+        status: 'active', 
       })
       .select()
       .single();
