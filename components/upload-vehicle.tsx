@@ -473,7 +473,7 @@ export default function UploadVehicle({
       }, 2000)
     } catch (error) {
       console.error("Failed to submit vehicle:", error)
-      setSubmitError(error instanceof Error ? error.message : "Failed to list vehicle.")
+      setSubmitError(error instanceof Error ? error.message : String(error) || "Failed to list vehicle.")
     } finally {
       setIsSubmitting(false)
     }

@@ -55,6 +55,22 @@ export const vehicleService = {
     const { userId, images, ...restOfData } = vehicleData;
 
     // 1. Insert vehicle data without images to get an ID
+    const vehicleInsert = {
+      user_id: userId,
+      make: vehicleData.make,
+      model: vehicleData.model,
+      variant: vehicleData.variant,
+      year: vehicleData.year,
+      price: vehicleData.price,
+      mileage: vehicleData.mileage,
+      transmission: vehicleData.transmission,
+      fuel: vehicleData.fuel,
+      engine_capacity: vehicleData.engineCapacity,
+      body_type: vehicleData.bodyType,
+      description: vehicleData.description,
+      city: vehicleData.city,
+      province: vehicleData.province,
+    };
     const { data: newVehicle, error: createError } = await supabase
       .from("vehicles")
       .insert({
@@ -80,7 +96,7 @@ export const vehicleService = {
         seller_province: vehicleData.sellerProvince,
         status: 'active',
       })
-      .select()
+      .select() // retrieves all columns of the newly created row
       .single();
 
     if (createError || !newVehicle) {
@@ -110,7 +126,8 @@ export const vehicleService = {
     }
 
     return updatedVehicle as Vehicle
-  },
+  }
+}
 
   /**
    * Fetch vehicles saved by a specific user
