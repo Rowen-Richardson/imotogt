@@ -17,6 +17,10 @@ export interface Vehicle {
   sellerPhone: string
   sellerEmail: string
   sellerAddress: string
+  sellerSuburb: string;
+  sellerCity: string;
+  sellerProvince: string;
+  sellerProfilePic: string;
 }
 
 export interface VehicleFilters {
@@ -57,6 +61,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "082 123 4567",
     sellerEmail: "james.wilson@example.com",
     sellerAddress: "Rondebosch, Cape Town, Western Cape",
+    sellerSuburb: "Rondebosch",
+    sellerCity: "Cape Town",
+    sellerProvince: "Western Cape",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 2,
@@ -77,6 +85,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "083 234 5678",
     sellerEmail: "sarah.j@example.com",
     sellerAddress: "Sandton, Johannesburg, Gauteng",
+    sellerSuburb: "Sandton",
+    sellerCity: "Johannesburg",
+    sellerProvince: "Gauteng",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 3,
@@ -97,6 +109,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "084 345 6789",
     sellerEmail: "michael.b@example.com",
     sellerAddress: "Umhlanga, Durban, KwaZulu-Natal",
+    sellerSuburb: "Umhlanga",
+    sellerCity: "Durban",
+    sellerProvince: "KwaZulu-Natal",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 4,
@@ -117,6 +133,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "082 456 7890",
     sellerEmail: "david.smith@example.com",
     sellerAddress: "Waterkloof, Pretoria, Gauteng",
+    sellerSuburb: "Waterkloof",
+    sellerCity: "Pretoria",
+    sellerProvince: "Gauteng",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 5,
@@ -137,6 +157,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "083 567 8901",
     sellerEmail: "emily.d@example.com",
     sellerAddress: "Langenhoven Park, Bloemfontein, Free State",
+    sellerSuburb: "Langenhoven Park",
+    sellerCity: "Bloemfontein",
+    sellerProvince: "Free State",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 6,
@@ -157,6 +181,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "084 678 9012",
     sellerEmail: "robert.t@example.com",
     sellerAddress: "Summerstrand, Port Elizabeth, Eastern Cape",
+    sellerSuburb: "Summerstrand",
+    sellerCity: "Port Elizabeth",
+    sellerProvince: "Eastern Cape",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 7,
@@ -177,6 +205,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "082 789 0123",
     sellerEmail: "jennifer.w@example.com",
     sellerAddress: "Sea Point, Cape Town, Western Cape",
+    sellerSuburb: "Sea Point",
+    sellerCity: "Cape Town",
+    sellerProvince: "Western Cape",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 8,
@@ -197,6 +229,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "083 890 1234",
     sellerEmail: "thomas.a@example.com",
     sellerAddress: "Sunwood, Boksburg, Gauteng",
+    sellerSuburb: "Sunwood",
+    sellerCity: "Boksburg",
+    sellerProvince: "Gauteng",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
   {
     id: 9,
@@ -217,6 +253,10 @@ export const vehicles: Vehicle[] = [
     sellerPhone: "086 864 8686",
     sellerEmail: "tofu.delivery@fujiwara.co.za",
     sellerAddress: "Franschhoek Pass, Franschhoek, Western Cape",
+    sellerSuburb: "Franschhoek",
+    sellerCity: "Franschhoek",
+    sellerProvince: "Western Cape",
+    sellerProfilePic: "/placeholder-user.jpg",
   },
 ]
 
