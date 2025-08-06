@@ -8,6 +8,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase environment variables")
 }
 
+// Default client for client-side usage
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
@@ -61,7 +62,7 @@ export function handleSupabaseError(error: any): string {
     return "Permission denied. You may need to re-authenticate to perform this action."
   }
 
-  // Return the original message if no specific handling
+  // Return original message
   return error.message || "An unexpected error occurred"
 }
 
@@ -76,11 +77,11 @@ export const storageService = {
     try {
       const fileExt = file.name.split(".").pop()
       const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `${userId}/${fileName}` // Upload to a user-specific folder
+      const filePath = `${userId}/${fileName}`
 
       const { data, error } = await supabase.storage.from("profile-picture").upload(filePath, file, {
         cacheControl: "3600",
-        upsert: false, // Set to false as we generate a unique name
+        upsert: false,
       })
 
       if (error) {
@@ -187,7 +188,9 @@ export const storageService = {
   },
 }
 
-// Server-side client for API routes
+/**
+ * Create a Supabase client for server-side usage (API routes, server components)
+ */
 export const createServerSupabaseClient = () => {
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
