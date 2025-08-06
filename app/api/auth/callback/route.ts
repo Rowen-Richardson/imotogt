@@ -18,7 +18,11 @@ export async function GET(request: NextRequest) {
 
       if (data.user) {
         // Check if user profile exists, create if not
-        const { data: existingProfile } = await supabase.from("users").select("id").eq("id", data.user.id).single()
+        const { data: existingProfile } = await supabase
+          .from("users")
+          .select("id")
+          .eq("id", data.user.id)
+          .single()
 
         if (!existingProfile) {
           // Create user profile
