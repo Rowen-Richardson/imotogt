@@ -52,25 +52,21 @@ export const vehicleService = {
    * Create a new vehicle listing, upload images, and link them.
    */
   async createVehicle(vehicleData: VehiclePayload): Promise<Vehicle> {
-    const { userId, images, ...restOfData } = vehicleData;
+    const { userId, images, ...restOfData } = vehicleData
 
-    // 1. Insert vehicle data without images to get an ID
-    const vehicleInsert = {
-      user_id: userId,
-      make: vehicleData.make,
-      model: vehicleData.model,
-      variant: vehicleData.variant,
-      year: vehicleData.year,
-      price: vehicleData.price,
-      mileage: vehicleData.mileage,
-      transmission: vehicleData.transmission,
-      fuel: vehicleData.fuel,
-      engine_capacity: vehicleData.engineCapacity,
-      body_type: vehicleData.bodyType,
-      description: vehicleData.description,
-      city: vehicleData.city,
-      province: vehicleData.province,
-    };
+    // 1. Fetch user data to populate seller fields
+    const { data: userProfile, error: userError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single()
+
+    if (userError || !userProfile) {
+      console.error("Error fetching user profile:", userError)
+      throw new Error("Could not fetch user profile to create vehicle listing.")
+    }
+
+    // 2. Insert vehicle data with seller info from the user's profile
     const { data: newVehicle, error: createError } = await supabase
       .from("vehicles")
       .insert({
@@ -88,16 +84,18 @@ export const vehicleService = {
         description: vehicleData.description,
         city: vehicleData.city,
         province: vehicleData.province,
-        seller_name: vehicleData.sellerName,
-        seller_email: vehicleData.sellerEmail,
-        seller_phone: vehicleData.sellerPhone,
-        seller_suburb: vehicleData.sellerSuburb,
-        seller_city: vehicleData.sellerCity,
-        seller_province: vehicleData.sellerProvince,
-        status: 'active',
+        // Automatically populate seller info from the user's profile
+        seller_name: `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim(),
+        seller_email: userProfile.email,
+        seller_phone: userProfile.phone,
+        seller_suburb: userProfile.suburb,
+        seller_city: userProfile.city,
+        seller_province: userProfile.province,
+        seller_profile_pic: userProfile.profile_pic,
+        status: "active",
       })
       .select() // retrieves all columns of the newly created row
-      .single();
+      .single()
 
     if (createError || !newVehicle) {
       console.error("Error creating vehicle record:", createError);

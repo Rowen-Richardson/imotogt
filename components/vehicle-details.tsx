@@ -846,10 +846,10 @@ export default function VehicleDetails({
                   </div>
                 ) : (
                   <div className="space-y-5 text-[#3E5641]">
-                    <div><p className="contact-label">Seller</p><p>{vehicle.sellerName}</p></div>
-                    <div><p className="contact-label">Phone</p><div className="flex items-center"><Phone className="contact-icon" /><p>{vehicle.sellerPhone}</p></div></div>
-                    <div><p className="contact-label">Email</p><div className="flex items-center"><Mail className="contact-icon" /><p>{vehicle.sellerEmail}</p></div></div>
-                    <div><p className="contact-label">Location</p><p>{sellerAddressDisplay}</p></div>
+                    <div><p className="contact-label text-white">Seller</p><p className="text-white">{vehicle.sellerName}</p></div>
+                    <div><p className="contact-label text-white">Phone</p><div className="flex items-center"><Phone className="contact-icon" /><p className="text-white">{vehicle.sellerPhone}</p></div></div>
+                    <div><p className="contact-label text-white">Email</p><div className="flex items-center"><Mail className="contact-icon" /><p className="text-white">{vehicle.sellerEmail}</p></div></div>
+                    <div><p className="contact-label text-white">Location</p><p className="text-white">{sellerAddressDisplay}</p></div>
                     <button
                       onClick={handleContactClick}
                       className="w-full bg-[#FF6700] dark:bg-[#FF7D33] text-white font-medium py-3 rounded-xl hover:bg-[#FF6700]/90 dark:hover:bg-[#FF7D33]/90 transition-colors mt-4 flex justify-center items-center"
@@ -893,7 +893,7 @@ const EditableField = ({ label, name, value, onChange, type = "text", placeholde
   isTextarea?: boolean;
 }) => (
   <div>
-    <label htmlFor={name} className={`block text-sm font-medium ${textWhite ? 'text-gray-300' : 'text-[#6F7F69] dark:text-gray-300'} mb-1`}>{label}</label>
+    <label htmlFor={name} className={`block text-sm font-medium ${textWhite ? 'text-gray-300' : 'text-[#6F7F69] dark:text-gray-300'} mb-1 text-white`}>{label}</label>
     {isTextarea ? (
       <textarea id={name} name={name} value={value || ""} onChange={onChange} placeholder={placeholder || label} className={`form-input-edit w-full min-h-[80px] ${textWhite ? 'bg-[#576B55] dark:bg-[#2A352A] text-white placeholder-gray-400' : ''}`} />
     ) : (
