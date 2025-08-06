@@ -53,7 +53,6 @@ export const vehicleService = {
    */
   async createVehicle(vehicleData: VehiclePayload): Promise<Vehicle> {
     const { userId, images, ...restOfData } = vehicleData
-
     // 1. Fetch user data to populate seller fields
     const { data: userProfile, error: userError } = await supabase
       .from("users")
