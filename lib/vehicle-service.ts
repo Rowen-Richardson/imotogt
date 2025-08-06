@@ -126,9 +126,7 @@ export const vehicleService = {
     }
 
     return updatedVehicle as Vehicle
-  }
-}
-
+  },
   /**
    * Fetch vehicles saved by a specific user
    */
