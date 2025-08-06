@@ -37,6 +37,13 @@ CREATE TABLE IF NOT EXISTS vehicles (
     images TEXT[] DEFAULT '{}',
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'sold', 'inactive')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    seller_name VARCHAR(255),
+    seller_email VARCHAR(255),
+    seller_phone VARCHAR(20),
+    seller_suburb VARCHAR(100),
+    seller_city VARCHAR(100),
+    seller_province VARCHAR(100),
+    seller_profile_pic TEXT,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

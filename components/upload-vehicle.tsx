@@ -464,6 +464,7 @@ export default function UploadVehicle({
         sellerCity: formData.sellerCity,
         sellerProvince: formData.sellerProvince,
         sellerProfilePic: formData.sellerProfilePic,
+
       };
 
       await onVehicleSubmit(vehicleDataWithSeller)
