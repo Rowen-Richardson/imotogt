@@ -845,7 +845,7 @@ export default function VehicleDetails({
                     <EditableField label="Seller Address" name="sellerAddress" value={editableData.sellerAddress} onChange={handleInputChange} textWhite={true} isTextarea={true} />
                   </div>
                 ) : (
-                  <div className="space-y-5 text-white">
+                  <div className="space-y-5 text-[#3E5641]">
                     <div><p className="contact-label">Seller</p><p>{vehicle.sellerName}</p></div>
                     <div><p className="contact-label">Phone</p><div className="flex items-center"><Phone className="contact-icon" /><p>{vehicle.sellerPhone}</p></div></div>
                     <div><p className="contact-label">Email</p><div className="flex items-center"><Mail className="contact-icon" /><p>{vehicle.sellerEmail}</p></div></div>
@@ -893,7 +893,7 @@ const EditableField = ({ label, name, value, onChange, type = "text", placeholde
   isTextarea?: boolean;
 }) => (
   <div>
-    <label htmlFor={name} className={`block text-sm font-medium ${textWhite ? 'text-gray-300' : 'text-[#6F7F69] dark:text-gray-400'} mb-1`}>{label}</label>
+    <label htmlFor={name} className={`block text-sm font-medium ${textWhite ? 'text-gray-300' : 'text-[#6F7F69] dark:text-gray-300'} mb-1`}>{label}</label>
     {isTextarea ? (
       <textarea id={name} name={name} value={value || ""} onChange={onChange} placeholder={placeholder || label} className={`form-input-edit w-full min-h-[80px] ${textWhite ? 'bg-[#576B55] dark:bg-[#2A352A] text-white placeholder-gray-400' : ''}`} />
     ) : (
