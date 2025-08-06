@@ -31,6 +31,7 @@ export function Header({
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [loginToggle, setLoginToggle] = useState(false)
   const router = useRouter()
   const { user: authUser, userProfile, signOut: contextSignOut } = useUser()
   const isMobile = useMobile()
@@ -167,73 +168,36 @@ export function Header({
 
           {/* Desktop User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {currentUser ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors"
-                >
-                  {userProfile?.profilePic ? (
-                    <Image
-                      src={userProfile.profilePic || "/placeholder.svg"}
-                      alt="Profile"
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover border-2 "
-                      style={{ aspectRatio: '1/1' }}
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  <span className="font-medium">
-                    {userProfile?.firstName || currentUser.email?.split("@")[0] || "User"}
-                  </span>
-                </button>
-
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                    <button
-                      onClick={() => handleNavigation(onDashboardClick)}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    >
-                      <Car className="w-4 h-4" />
-                      <span>Dashboard</span>
-                    </button>
-                    <button
-                      onClick={() => handleNavigation(() => (window.location.href = "/settings"))}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    >
-                      <Settings className="w-4 h-4" />
-                      <span>Settings</span>
-                    </button>
-                    <button
-                      onClick={() => handleNavigation(() => (window.location.href = "/liked-cars"))}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    >
-                      <Heart className="w-4 h-4" />
-                      <span>Liked Cars</span>
-                    </button>
-                    <hr className="my-2" />
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => handleNavigation(onLoginClick)}
-                className="bg-orange-500 text-white px-6 py-2 hover:bg-orange-600 transition-colors font-medium rounded-full"
-              >
-                Login
-              </button>
-            )}
+            <button
+              onClick={() => {
+                setLoginToggle((prev) => !prev)
+                if (!loginToggle) {
+                  router.push("/dashboard")
+                } else {
+                  router.push("/home")
+                }
+              }}
+              className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors font-medium rounded-full px-4 py-2"
+              style={{ minWidth: 120 }}
+            >
+              {userProfile?.profilePic ? (
+                <Image
+                  src={userProfile.profilePic || "/placeholder.svg"}
+                  alt="Profile"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover border-2"
+                  style={{ aspectRatio: '1/1' }}
+                />
+              ) : (
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+              )}
+              <span className="font-medium">
+                {userProfile?.firstName || currentUser?.email?.split("@")[0] || "User"}
+              </span>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}

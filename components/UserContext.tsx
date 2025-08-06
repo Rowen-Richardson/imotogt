@@ -5,7 +5,7 @@ import { authService } from "@/lib/auth"
 import { vehicleService } from "@/lib/vehicle-service"
 import type { User } from "@supabase/supabase-js"
 import type { UserProfile } from "@/types/user"
-import type { Vehicle } from "@/lib/data"
+import type { Vehicle } from "@/types/vehicle"
 import { useRouter } from "next/navigation"
 
 interface UserContextType {
@@ -13,7 +13,7 @@ interface UserContextType {
   userProfile: UserProfile | null
   loading: boolean
   listedVehicles: Vehicle[]
-  savedVehicles: Vehicle[]
+  savedVehicles: Set<string>
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, userData?: Partial<UserProfile>) => Promise<void>
   signOut: () => Promise<void>
@@ -30,7 +30,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [listedVehicles, setListedVehicles] = useState<Vehicle[]>([])
-  const [savedVehicles, setSavedVehicles] = useState<Vehicle[]>([])
+  const [savedVehicles, setSavedVehicles] = useState<Set<string>>(new Set())
   const router = useRouter()
 
   const fetchUserData = useCallback(async (currentUser: User) => {
@@ -42,13 +42,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ])
       setUserProfile(profile)
       setListedVehicles(userListed)
-      setSavedVehicles(userSaved)
+      setSavedVehicles(new Set(userSaved.map((v) => v.id))) // Convert to Set of IDs
     } catch (error) {
       console.error("UserContext: Error fetching user data:", error)
       // On error, clear out potentially stale data
       setUserProfile(null)
       setListedVehicles([])
-      setSavedVehicles([])
+      setSavedVehicles(new Set())
     }
   }, [])
 
@@ -56,7 +56,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUser(null)
     setUserProfile(null)
     setListedVehicles([])
-    setSavedVehicles([])
+    setSavedVehicles(new Set())
   }
 
   const refreshUser = useCallback(async () => {
@@ -162,12 +162,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       router.push("/login")
       return
     }
-    const isSaved = savedVehicles.some((v) => v.id === vehicle.id)
+    const isSaved = savedVehicles.has(vehicle.id) // Use .has() for Set
     if (isSaved) {
-      setSavedVehicles((prev) => prev.filter((v) => v.id !== vehicle.id))
+      setSavedVehicles((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(vehicle.id)
+        return newSet
+      })
       await vehicleService.unsaveVehicle(user.id, vehicle.id)
     } else {
-      setSavedVehicles((prev) => [...prev, vehicle])
+      setSavedVehicles((prev) => new Set(prev).add(vehicle.id)) // Add to Set
       await vehicleService.saveVehicle(user.id, vehicle.id)
     }
   }

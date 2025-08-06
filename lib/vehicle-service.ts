@@ -1,5 +1,5 @@
 import { supabase, storageService } from "./supabase"
-import type { Vehicle } from "@/types/user"
+import type { Vehicle } from "@/types/vehicle"
 
 type VehiclePayload = Omit<Vehicle, "id" | "createdAt" | "updatedAt" | "images"> & {
   userId: string
@@ -11,17 +11,7 @@ export const vehicleService = {
    * Fetch all vehicles with optional filters
    */
   async getVehicles(filters: any = {}): Promise<Vehicle[]> {
-    let query = supabase.from("vehicles").select("*")
-
-    // Example filtering
-    if (filters.make) {
-      query = query.eq("make", filters.make)
-    }
-    if (filters.model) {
-      query = query.eq("model", filters.model)
-    }
-
-    const { data, error } = await query
+    const { data, error } = await supabase.from("vehicles").select("*")
 
     if (error) {
       console.error("Error fetching vehicles:", error)
@@ -82,6 +72,13 @@ export const vehicleService = {
         description: vehicleData.description,
         city: vehicleData.city,
         province: vehicleData.province,
+        seller_name: vehicleData.sellerName,
+        seller_email: vehicleData.sellerEmail,
+        seller_phone: vehicleData.sellerPhone,
+        seller_suburb: vehicleData.sellerSuburb,
+        seller_city: vehicleData.sellerCity,
+        seller_province: vehicleData.sellerProvince,
+        status: 'active',
       })
       .select()
       .single();

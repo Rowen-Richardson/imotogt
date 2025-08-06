@@ -7,7 +7,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 import { Search, X, ChevronDown, Truck, CarIcon, Bike, Facebook, Instagram, Twitter } from "lucide-react"
 import VehicleDetails from "./vehicle-details"
 import LocationPage from "./location-page"
-import { vehicles } from "@/lib/data"
+import { vehicleService } from "@/lib/vehicle-service"
 import type { Vehicle } from "@/lib/data"
 import { useUser } from "@/components/UserContext"
 import { Header } from "./ui/header"
@@ -50,8 +50,8 @@ export default function CarMarketplace() {
   const [showMoreOptions, setShowMoreOptions] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
-  const [allVehicles, setAllVehicles] = useState<Vehicle[]>(vehicles)
-  const [filteredVehicles, setFilteredVehicles] = useState(vehicles)
+  const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
+  const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([])
   const [isSearchPage, setIsSearchPage] = useState(true)
   const [savedCars, setSavedCars] = useState<Vehicle[]>([])
 
@@ -121,8 +121,13 @@ export default function CarMarketplace() {
   }
 
   useEffect(() => {
-    setFilteredVehicles(allVehicles)
-  }, [allVehicles])
+    const fetchVehicles = async () => {
+      const fetchedVehicles = await vehicleService.getVehicles()
+      setAllVehicles(fetchedVehicles)
+      setFilteredVehicles(fetchedVehicles)
+    }
+    fetchVehicles()
+  }, [])
 
   const generateSuggestions = (input: string) => {
     if (!input.trim()) {
@@ -723,8 +728,8 @@ export default function CarMarketplace() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {/* Display first 6 vehicles as featured */}
-                {allVehicles.slice(0, 6).map((vehicle) => (
+                {/* Display all vehicles as featured */}
+                {allVehicles.map((vehicle) => (
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}

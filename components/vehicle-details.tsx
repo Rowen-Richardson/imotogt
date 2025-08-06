@@ -20,7 +20,7 @@ import {
   UploadCloud, // For image upload
   Search, // For image zoom overlay
 } from "lucide-react"
-import type { Vehicle } from "@/lib/data"
+import type { Vehicle } from "@/types/vehicle"
 import type { UserProfile } from "@/types/user"; // Added import
 
 interface VehicleDetailsProps {
@@ -162,6 +162,14 @@ export default function VehicleDetails({
       setShowContactForm(true)
     }
   }
+
+  const sellerAddressDisplay = useMemo(() => {
+    const parts = [];
+    if (vehicle.sellerSuburb) parts.push(vehicle.sellerSuburb);
+    if (vehicle.sellerCity) parts.push(vehicle.sellerCity);
+    if (vehicle.sellerProvince) parts.push(vehicle.sellerProvince);
+    return parts.join(", ");
+  }, [vehicle.sellerSuburb, vehicle.sellerCity, vehicle.sellerProvince]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -841,7 +849,7 @@ export default function VehicleDetails({
                     <div><p className="contact-label">Seller</p><p>{vehicle.sellerName}</p></div>
                     <div><p className="contact-label">Phone</p><div className="flex items-center"><Phone className="contact-icon" /><p>{vehicle.sellerPhone}</p></div></div>
                     <div><p className="contact-label">Email</p><div className="flex items-center"><Mail className="contact-icon" /><p>{vehicle.sellerEmail}</p></div></div>
-                    <div><p className="contact-label">Address</p><p>{vehicle.sellerAddress}</p></div>
+                    <div><p className="contact-label">Location</p><p>{sellerAddressDisplay}</p></div>
                     <button
                       onClick={handleContactClick}
                       className="w-full bg-[#FF6700] dark:bg-[#FF7D33] text-white font-medium py-3 rounded-xl hover:bg-[#FF6700]/90 dark:hover:bg-[#FF7D33]/90 transition-colors mt-4 flex justify-center items-center"
@@ -862,7 +870,7 @@ export default function VehicleDetails({
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 src={`https://www.google.com/maps?q=${encodeURIComponent(
-                  vehicle.sellerAddress || `${vehicle.city}, ${vehicle.province}`,
+                  sellerAddressDisplay || `${vehicle.city}, ${vehicle.province}`,
                 )}&output=embed&hl=en`}
               />
             </div>
