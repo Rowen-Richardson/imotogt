@@ -454,7 +454,19 @@ export default function UploadVehicle({
 
     try {
       const vehicleData = { ...formData, images: vehicleImages }
-      await onVehicleSubmit(vehicleData)
+      // Include seller details when submitting the vehicle data
+      const vehicleDataWithSeller = {
+        ...vehicleData,
+        sellerName: formData.sellerName,
+        sellerEmail: formData.sellerEmail,
+        sellerPhone: formData.sellerPhone,
+        sellerSuburb: formData.sellerSuburb,
+        sellerCity: formData.sellerCity,
+        sellerProvince: formData.sellerProvince,
+        sellerProfilePic: formData.sellerProfilePic,
+      };
+
+      await onVehicleSubmit(vehicleDataWithSeller)
       setSubmitSuccess("Vehicle listed successfully! Redirecting to your dashboard...")
       setTimeout(() => {
         router.push("/dashboard")
