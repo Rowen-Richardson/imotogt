@@ -8,7 +8,7 @@ import VehicleCard from "@/components/vehicle-card"
 import VehicleDetails from "@/components/vehicle-details"
 import { useUser } from "@/components/UserContext"
 import { vehicleService } from "@/lib/vehicle-service"
-import type { Vehicle } from "@/lib/data"
+import type { Vehicle } from "@/types/vehicle"
 import { Search } from "lucide-react"
 
 export default function ResultsPage() {
@@ -42,7 +42,7 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetchAndSetVehicles = async () => {
       setLoading(true)
-      const data = await vehicleService.getVehicles()
+      const data = await vehicleService.getVehicles(filters) // Pass filters here
       if (data) {
         setAllVehicles(data)
       } else {
@@ -51,7 +51,7 @@ export default function ResultsPage() {
       setLoading(false)
     }
     fetchAndSetVehicles()
-  }, [])
+  }, [filters]) // Add filters to dependency array
 
   const handleFilterChange = useCallback(
     (newFilters: any) => {
@@ -70,66 +70,8 @@ export default function ResultsPage() {
   )
 
   const filteredVehicles = useMemo(() => {
-    return allVehicles.filter((vehicle) => {
-      const {
-        query,
-        minPrice,
-        maxPrice,
-        province,
-        bodyType,
-        minYear,
-        maxYear,
-        minMileage,
-        maxMileage,
-        fuelType,
-        transmission,
-        engineCapacityMin,
-        engineCapacityMax,
-      } = filters
-
-      // Keyword search
-      if (query) {
-        const lowerQuery = query.toLowerCase()
-        const vehicleText = `${vehicle.make} ${vehicle.model} ${vehicle.variant || ""}`.toLowerCase()
-        if (!vehicleText.includes(lowerQuery)) return false
-      }
-
-      // Price filter
-      const vehiclePrice = vehicle.price ? Number.parseFloat(String(vehicle.price)) : 0
-      if (minPrice && vehiclePrice < Number.parseFloat(minPrice)) return false
-      if (maxPrice && vehiclePrice > Number.parseFloat(maxPrice)) return false
-
-      // Province filter
-      if (province && vehicle.province !== province) return false
-
-      // Body Type filter
-      if (bodyType.length > 0 && !bodyType.includes(vehicle.bodyType || "")) return false
-
-      // Year filter
-      if (minYear && vehicle.year < Number.parseInt(minYear, 10)) return false
-      if (maxYear && vehicle.year > Number.parseInt(maxYear, 10)) return false
-
-      // Mileage filter
-      const vehicleMileage = vehicle.mileage ? Number.parseInt(String(vehicle.mileage).replace(/\D/g, ""), 10) : 0
-      if (minMileage && vehicleMileage < Number.parseInt(minMileage, 10)) return false
-      if (maxMileage && vehicleMileage > Number.parseInt(maxMileage, 10)) return false
-
-      // Fuel Type filter
-      if (fuelType.length > 0 && !fuelType.includes(vehicle.fuel || "")) return false
-
-      // Transmission filter
-      if (transmission && vehicle.transmission !== transmission) return false
-
-      // Engine Capacity filter
-      const vehicleEngineLiters = vehicle.engineCapacity
-        ? Number.parseFloat(String(vehicle.engineCapacity).replace("L", ""))
-        : 0
-      if (engineCapacityMin && vehicleEngineLiters < Number.parseFloat(engineCapacityMin)) return false
-      if (engineCapacityMax && vehicleEngineLiters > Number.parseFloat(engineCapacityMax)) return false
-
-      return true
-    })
-  }, [allVehicles, filters])
+    return allVehicles
+  }, [allVehicles])
 
   const handleSignOut = async () => {
     await signOut()
@@ -155,7 +97,7 @@ export default function ResultsPage() {
             onBack={() => setSelectedVehicle(null)}
             user={user}
             isSaved={savedVehicles.has(selectedVehicle.id)}
-            onToggleSave={() => toggleSaveVehicle(selectedVehicle.id)}
+            onToggleSave={() => toggleSaveVehicle(selectedVehicle)}
           />
         </div>
       </>
@@ -202,7 +144,7 @@ export default function ResultsPage() {
                     vehicle={vehicle}
                     onViewDetails={() => setSelectedVehicle(vehicle)}
                     isSaved={savedVehicles.has(vehicle.id)}
-                    onToggleSave={() => toggleSaveVehicle(vehicle.id)}
+                    onToggleSave={() => toggleSaveVehicle(vehicle)}
                     isLoggedIn={!!user}
                   />
                 ))}

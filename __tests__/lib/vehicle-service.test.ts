@@ -81,7 +81,19 @@ describe("VehicleService", () => {
       }
 
       vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue(mockQuery),
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          ilike: vi.fn().mockReturnThis(),
+          gte: vi.fn().mockReturnThis(),
+          lte: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: mockVehicles,
+            error: null,
+            count: 1,
+          }),
+        }),
       } as any)
 
       const result = await vehicleService.getVehicles()
@@ -103,7 +115,19 @@ describe("VehicleService", () => {
       }
 
       vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue(mockQuery),
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          ilike: vi.fn().mockReturnThis(),
+          gte: vi.fn().mockReturnThis(),
+          lte: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: null,
+            error: { message: "Database error", code: "DB_ERROR" },
+            count: null,
+          }),
+        }),
       } as any)
 
       await expect(vehicleService.getVehicles()).rejects.toThrow(VehicleError)
