@@ -852,7 +852,7 @@ export default function VehicleDetails({
                     <div><p className="contact-label text-white">Location</p><p className="text-white">{sellerAddressDisplay}</p></div>
                     <button
                       onClick={handleContactClick}
-                      className="w-full bg-[#FF6700] dark:bg-[#FF7D33] text-white font-medium py-3 rounded-xl hover:bg-[#FF6700]/90 dark:hover:bg-[#FF7D33]/90 transition-colors mt-4 flex justify-center items-center"
+                      className="w-full bg-[#FF6700] dark:bg-[#FF7D33] text-white font-medium py-3 rounded-xl hover:bg-[#FF6700]/90 dark:hover:bg-[#FF7D33]/90 transition-colors mt-4 flex j{vehicle.sellerNamec/>enter"
                     >
                       {isMobile ? <><Phone className="w-5 h-5 mr-2" />Call Seller</> : <><Mail className="w-5 h-5 mr-2" />Contact Seller</>}
                     </button>
