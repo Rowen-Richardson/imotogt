@@ -186,7 +186,8 @@ export default function ProfileSettings({
   }
 
   const handleSignOutButton = () => {
-    onSignOut()
+    onSignOut();
+    router.push("/home");
   }
 
   if (!user) {

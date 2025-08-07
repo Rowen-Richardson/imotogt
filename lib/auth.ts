@@ -187,20 +187,28 @@ export const authService = {
       const { data, error } = await supabase.auth.getUser()
 
       if (error) {
+        // Ignore missing session errors for guests
+        if (error.message === "Auth session missing!") {
+          return null;
+        }
         // This error indicates the user in the JWT doesn't exist in the DB.
         if (error.message.includes("User from sub claim in JWT does not exist")) {
           console.warn("User from token not found in DB. Forcing sign-out to clear invalid session.")
           await this.signOut()
           return null
         }
+        // Log only unexpected errors
         console.error("Error getting current user:", error.message)
         return null
       }
 
       return data.user
     } catch (e) {
-      console.error("Unexpected error in getCurrentUser:", e)
-      // Fail-safe sign-out
+      // Only log unexpected errors
+      if (!(e instanceof Error && e.message === "Auth session missing!")) {
+        console.error("Unexpected error in getCurrentUser:", e)
+      }
+      // Fail-safe sign-out for unexpected errors
       await this.signOut()
       return null
     }

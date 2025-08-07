@@ -19,6 +19,7 @@ import {
   Star, // Keep for review tab
   UploadCloud, // For image upload
   Search, // For image zoom overlay
+  MapPin, // For location display
 } from "lucide-react"
 import type { Vehicle } from "@/types/vehicle"
 import type { UserProfile } from "@/types/user"; // Added import
@@ -42,6 +43,27 @@ export default function VehicleDetails({
   isEditMode = false,
   onUpdateVehicle
 }: VehicleDetailsProps) {
+  // DEBUG: Print the full vehicle object to check seller fields
+  console.log('VehicleDetails vehicle:', vehicle);
+  // Debug log
+  console.log('Vehicle details:', {
+    sellerName: vehicle.sellerName,
+    sellerEmail: vehicle.sellerEmail,
+    sellerPhone: vehicle.sellerPhone,
+    sellerSuburb: vehicle.sellerSuburb,
+    sellerCity: vehicle.sellerCity,
+    sellerProvince: vehicle.sellerProvince
+  });
+  // Debug log to see what data we're receiving
+  console.log('Vehicle Details:', {
+    sellerName: vehicle.sellerName,
+    sellerEmail: vehicle.sellerEmail,
+    sellerPhone: vehicle.sellerPhone,
+    sellerSuburb: vehicle.sellerSuburb,
+    sellerCity: vehicle.sellerCity,
+    sellerProvince: vehicle.sellerProvince,
+    userId: vehicle.userId
+  });
   const [showContactForm, setShowContactForm] = useState(false)
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
@@ -165,11 +187,26 @@ export default function VehicleDetails({
 
   const sellerAddressDisplay = useMemo(() => {
     const parts = [];
-    if (vehicle.sellerSuburb) parts.push(vehicle.sellerSuburb);
-    if (vehicle.sellerCity) parts.push(vehicle.sellerCity);
-    if (vehicle.sellerProvince) parts.push(vehicle.sellerProvince);
-    return parts.join(", ");
-  }, [vehicle.sellerSuburb, vehicle.sellerCity, vehicle.sellerProvince]);
+    // Always try to use seller-specific location first
+    if (vehicle.sellerSuburb) {
+      parts.push(vehicle.sellerSuburb.trim());
+    }
+    if (vehicle.sellerCity) {
+      parts.push(vehicle.sellerCity.trim());
+    }
+    if (vehicle.sellerProvince) {
+      parts.push(vehicle.sellerProvince.trim());
+    }
+    
+    // Only fall back to vehicle location if no seller location is available
+    if (parts.length === 0) {
+      if (vehicle.city) parts.push(vehicle.city.trim());
+      if (vehicle.province) parts.push(vehicle.province.trim());
+    }
+    
+    // Filter out any empty strings and join with commas
+    return parts.filter(part => part && part.length > 0).join(", ") || "Location not available";
+  }, [vehicle.sellerSuburb, vehicle.sellerCity, vehicle.sellerProvince, vehicle.city, vehicle.province]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -789,76 +826,76 @@ export default function VehicleDetails({
           {/* Contact Seller Section */}
           <div className="lg:col-span-1">
             <div className="bg-[#3E5641]/80 dark:bg-[#1F2B20]/80 backdrop-blur-lg rounded-xl shadow-lg p-8 border border-white/10">
-              <h3 className="text-xl font-bold mb-6 text-white">{isEditMode ? "Edit Seller Information" : "Contact Seller"}</h3>
-
-              {showContactForm ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="email" className="block text-sm text-gray-300 mb-1">
-                      Your Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#576B55] dark:bg-[#2A352A] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6700] dark:focus:ring-[#FF7D33]"
-                      placeholder="your@email.com"
-                      required
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white">{isEditMode ? "Edit Seller Information" : "Contact Seller"}</h3>
+                {vehicle.sellerProfilePic && (
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#FF6700]/20">
+                    <Image
+                      src={vehicle.sellerProfilePic || '/placeholder-user.jpg'}
+                      alt={vehicle.sellerName || 'Seller'}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-full"
                     />
                   </div>
+                )}
+              </div>
+              <div className="space-y-5">
+                  <div className="border-b border-white/10 pb-4">
+                      <p className="text-gray-300 text-sm mb-2">Seller</p>
+                      <div className="flex items-center space-x-2">
+                          <p className="text-white text-lg font-medium">
+                            {vehicle.sellerName}
+                          </p>
+                          {/* Show 'You' badge only if logged in user is the seller, but always show seller name */}
+                          {user && user.id === vehicle.userId && (
+                            <span className="bg-[#FF6700]/20 text-[#FF6700] text-xs px-2 py-1 rounded-full">
+                              You
+                            </span>
+                          )}
+                      </div>
+                  </div>
+                  <div className="border-b border-white/10 pb-4">
+                      <p className="text-gray-300 text-sm mb-2">Contact Information</p>
+                      <div className="space-y-2">
+                        {vehicle.sellerPhone && (
+                          <div className="flex items-center space-x-3">
+                              <Phone className="w-4 h-4 text-[#FF6700]" />
+                              <a href={`tel:${vehicle.sellerPhone.replace(/\s+/g, '')}`} 
+                                className="text-white hover:text-[#FF6700] transition-colors">
+                                  {vehicle.sellerPhone}
+                              </a>
+                          </div>
+                        )}
+                        {vehicle.sellerEmail && (
+                          <div className="flex items-center space-x-3">
+                              <Mail className="w-4 h-4 text-[#FF6700]" />
+                              <a href={`mailto:${vehicle.sellerEmail}`} 
+                                className="text-white hover:text-[#FF6700] transition-colors break-all">
+                                  {vehicle.sellerEmail}
+                              </a>
+                          </div>
+                        )}
+                      </div>
+                  </div>
                   <div>
-                    <label htmlFor="message" className="block text-sm text-gray-300 mb-1">
-                      Message
-                    </label>
-                    <textarea
-                      id="message"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#576B55] dark:bg-[#2A352A] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6700] dark:focus:ring-[#FF7D33] min-h-[100px]"
-                      placeholder="I'm interested in this vehicle..."
-                      required
-                    />
+                      <p className="text-gray-300 text-sm mb-2">Location</p>
+                      <div className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4 text-[#FF6700] flex-shrink-0" />
+                          <p className="text-white">
+                            {sellerAddressDisplay}
+                          </p>
+                      </div>
                   </div>
-                  <div className="flex space-x-3">
-                    <button
-                      type="submit"
-                      className="flex-1 bg-[#FF6700] dark:bg-[#FF7D33] text-white font-medium py-3 rounded-xl hover:bg-[#FF6700]/90 dark:hover:bg-[#FF7D33]/90 transition-colors"
-                    >
-                      Send Message
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowContactForm(false)}
-                      className="flex-1 bg-[#576B55] dark:bg-[#2A352A] text-white font-medium py-3 rounded-xl hover:bg-[#576B55]/90 dark:hover:bg-[#2A352A]/90 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                isEditMode ? (
-                  <div className="space-y-3">
-                    <EditableField label="Seller Name" name="sellerName" value={editableData.sellerName} onChange={handleInputChange} textWhite={true} />
-                    <EditableField label="Seller Phone" name="sellerPhone" value={editableData.sellerPhone} onChange={handleInputChange} textWhite={true} />
-                    <EditableField label="Seller Email" name="sellerEmail" type="email" value={editableData.sellerEmail} onChange={handleInputChange} textWhite={true} />
-                    <EditableField label="Seller Address" name="sellerAddress" value={editableData.sellerAddress} onChange={handleInputChange} textWhite={true} isTextarea={true} />
-                  </div>
-                ) : (
-                  <div className="space-y-5 text-[#3E5641]">
-                    <div><p className="contact-label text-white">Seller</p><p className="text-white">{vehicle.sellerName}</p></div>
-                    <div><p className="contact-label text-white">Phone</p><div className="flex items-center"><Phone className="contact-icon" /><p className="text-white">{vehicle.sellerPhone}</p></div></div>
-                    <div><p className="contact-label text-white">Email</p><div className="flex items-center"><Mail className="contact-icon" /><p className="text-white">{vehicle.sellerEmail}</p></div></div>
-                    <div><p className="contact-label text-white">Location</p><p className="text-white">{sellerAddressDisplay}</p></div>
-                    <button
-                      onClick={handleContactClick}
-                      className="w-full bg-[#FF6700] dark:bg-[#FF7D33] text-white font-medium py-3 rounded-xl hover:bg-[#FF6700]/90 dark:hover:bg-[#FF7D33]/90 transition-colors mt-4 flex j{vehicle.sellerNamec/>enter"
-                    >
-                      {isMobile ? <><Phone className="w-5 h-5 mr-2" />Call Seller</> : <><Mail className="w-5 h-5 mr-2" />Contact Seller</>}
-                    </button>
-                  </div>
-                )
-              )}
+                  {!isEditMode && user?.id !== vehicle.userId && (
+                      <button
+                          onClick={handleContactClick}
+                          className="w-full mt-4 bg-[#FF6700] hover:bg-[#FF7D33] text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                      >
+                          Contact Seller
+                      </button>
+                  )}
+              </div>
             </div>
 
             {/* Location Map */}
