@@ -55,6 +55,7 @@ export default function ProfileSettings({
 
   const [isSavingPersonal, setIsSavingPersonal] = useState(false)
   const [isSavingSecurity, setIsSavingSecurity] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const [personalError, setPersonalError] = useState<string | null>(null)
   const [securityError, setSecurityError] = useState<string | null>(null)
   const [securitySuccess, setSecuritySuccess] = useState<string | null>(null)
@@ -185,9 +186,18 @@ export default function ProfileSettings({
     }
   }
 
-  const handleSignOutButton = () => {
-    onSignOut();
-    router.push("/home");
+  const handleSignOutButton = async () => {
+    setIsSigningOut(true);
+    try {
+      await onSignOut();
+      // Add a slight delay for UX
+      setTimeout(() => {
+        router.push("/home");
+      }, 600);
+    } catch (e) {
+      // fallback: still redirect
+      router.push("/home");
+    }
   }
 
   if (!user) {
@@ -196,6 +206,17 @@ export default function ProfileSettings({
         User not found or not logged in.
       </div>
     )
+  }
+  if (isSigningOut) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--light-bg)] dark:bg-[var(--dark-bg)]">
+        <svg className="animate-spin h-10 w-10 text-orange-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <div className="text-xl font-semibold text-orange-500 dark:text-orange-400">Signing out...</div>
+      </div>
+    );
   }
 
   return (

@@ -83,16 +83,34 @@ export function Header({
     setShowUserMenu(false)
   }
 
+  // Unified navigation for Browse Cars
+  const handleBrowseCars = () => {
+    router.push("/results")
+    closeMenu()
+    setShowUserMenu(false)
+  }
+
+  // Unified navigation for Sell Your Car
   const handleSellClick = () => {
-    if (onGoToSellPage) {
-      onGoToSellPage()
+    if (isLoggedIn) {
+      router.push("/upload-vehicle")
     } else {
-      if (isLoggedIn) {
-        router.push("/upload-vehicle")
-      } else {
-        router.push("/login?next=/upload-vehicle")
-      }
+      router.push("/login?next=/upload-vehicle")
     }
+    closeMenu()
+    setShowUserMenu(false)
+  }
+
+  // Navigation for About and Services
+  const handleAbout = () => {
+    router.push("/about")
+    closeMenu()
+    setShowUserMenu(false)
+  }
+  const handleServices = () => {
+    router.push("/services")
+    closeMenu()
+    setShowUserMenu(false)
   }
 
   const getInitials = (firstName?: string, lastName?: string, email?: string) => {
@@ -108,12 +126,7 @@ export function Header({
     return "U"
   }
 
-  const navLinks = [
-    { href: "/home", label: "Home", handler: onGoHome },
-    { href: "/#featured", label: "All Cars", handler: onShowAllCars },
-    { href: "/about", label: "About Us" },
-    { href: "/services", label: "Services" },
-  ]
+  // No longer used
 
   const userMenuItems = [
     { label: "Dashboard", icon: Car, handler: onDashboardClick || (() => router.push("/dashboard")) },
@@ -147,23 +160,29 @@ export function Header({
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <button
-              onClick={() => handleNavigation(onShowAllCars)}
+              onClick={handleBrowseCars}
               className="text-white hover:text-orange-500 transition-colors font-medium"
             >
               Browse Cars
             </button>
             <button
-              onClick={() => handleNavigation(onGoToSellPage)}
+              onClick={handleSellClick}
               className="text-white hover:text-orange-500 transition-colors font-medium"
             >
               Sell Your Car
             </button>
-            <a href="/about" className="text-white hover:text-orange-500 transition-colors font-medium">
+            <button
+              onClick={handleAbout}
+              className="text-white hover:text-orange-500 transition-colors font-medium"
+            >
               About
-            </a>
-            <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
+            </button>
+            <button
+              onClick={handleServices}
+              className="text-white hover:text-orange-500 transition-colors font-medium"
+            >
               Services
-            </a>
+            </button>
           </div>
 
           {/* Desktop User Actions */}
@@ -194,31 +213,12 @@ export function Header({
                   <User className="w-4 h-4 text-white" />
                 </div>
               )}
-              <span className="font-medium">
-                {userProfile?.firstName || currentUser?.email?.split("@")[0] || "User"}
-              </span>
+              <span className="font-medium">Login</span>
             </button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
-            {currentUser && (
-              <div className="flex items-center space-x-2">
-                {userProfile?.profilePic ? (
-                  <Image
-                    src={userProfile.profilePic || "/placeholder.svg"}
-                    alt="Profile"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </div>
-            )}
             <button
               onClick={toggleMenu}
               className="text-white hover:text-orange-500 transition-colors"
@@ -238,29 +238,35 @@ export function Header({
         >
           <div className="px-6 py-4 space-y-4 border-t border-white/10">
             <button
-              onClick={() => handleNavigation(onShowAllCars)}
+              onClick={handleBrowseCars}
               className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
             >
               Browse Cars
             </button>
             <button
-              onClick={() => handleNavigation(onGoToSellPage)}
+              onClick={handleSellClick}
               className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
             >
               Sell Your Car
             </button>
-            <a href="/about" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+            <button
+              onClick={handleAbout}
+              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
+            >
               About
-            </a>
-            <a href="/services" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+            </button>
+            <button
+              onClick={handleServices}
+              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
+            >
               Services
-            </a>
+            </button>
 
             {currentUser ? (
               <div className="space-y-2 pt-4 border-t border-white/10">
                 <div className="flex items-center space-x-2 text-white py-2">
                   <span className="font-medium">
-                    {userProfile?.firstName || currentUser.email?.split("@")[0] || "User"}
+                    {userProfile?.firstName || currentUser.email?.split("@")?.[0] || "User"}
                   </span>
                 </div>
                 <button
