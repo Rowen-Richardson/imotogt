@@ -1,4 +1,6 @@
-import { supabase, handleSupabaseError } from "./supabase"
+import { createClient } from "@/utils/supabase/client"
+import { handleSupabaseError } from "./error-handler"
+import { storageService } from "./storage-service"
 import type { User } from "@supabase/supabase-js"
 import type { UserProfile } from "@/types/user"
 
@@ -17,6 +19,7 @@ export const authService = {
    * Sign up with email and password
    */
   async signUp(email: string, password: string, userData?: Partial<UserProfile>) {
+    const supabase = createClient()
     try {
       console.log("Starting sign up process for:", email)
 
@@ -38,8 +41,6 @@ export const authService = {
         throw new AuthError(handleSupabaseError(error), error.message)
       }
 
-      // Don't try to create profile manually here - let the trigger handle it
-      // Just return the user data
       return { user: data.user, session: data.session }
     } catch (error) {
       console.error("Sign up error:", error)
@@ -54,6 +55,7 @@ export const authService = {
    * Sign in with email and password
    */
   async signIn(email: string, password: string) {
+    const supabase = createClient()
     try {
       console.log("Starting sign in process for:", email)
 
@@ -82,12 +84,13 @@ export const authService = {
   /**
    * Sign in with OAuth provider
    */
-  async signInWithOAuth(provider: "google" | "facebook" | "apple") {
+  async signInWithOAuth(provider: "google") {
+    const supabase = createClient()
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/api/auth/callback`,
         },
       })
 
@@ -107,37 +110,16 @@ export const authService = {
    * Sign out - Enhanced with better session cleanup
    */
   async signOut() {
+    const supabase = createClient()
     try {
       console.log("Starting sign out process...")
-
-      // Sign out from Supabase auth
       const { error } = await supabase.auth.signOut()
-
       if (error) {
         console.error("Supabase sign out error:", error)
-        // Don't re-throw here, as we want to ensure cleanup happens
       }
-
       console.log("Supabase sign out successful")
-
-      // Clear any additional local storage items
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.removeItem("userProfile")
-          localStorage.removeItem("supabase.auth.token")
-          // Clear any other auth-related items
-          Object.keys(localStorage).forEach((key) => {
-            if (key.startsWith("supabase.auth.") || key.startsWith("sb-")) {
-              localStorage.removeItem(key)
-            }
-          })
-        } catch (storageError) {
-          console.warn("Error clearing localStorage:", storageError)
-        }
-      }
     } catch (error) {
       console.error("Sign out error:", error)
-      // Avoid throwing from signOut to prevent cascading failures
     }
   },
 
@@ -145,6 +127,7 @@ export const authService = {
    * Reset password
    */
   async resetPassword(email: string) {
+    const supabase = createClient()
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
@@ -164,6 +147,7 @@ export const authService = {
    * Update password
    */
   async updatePassword(newPassword: string) {
+    const supabase = createClient()
     try {
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
@@ -183,33 +167,18 @@ export const authService = {
    * Get current user with robust error handling for invalid sessions.
    */
   async getCurrentUser(): Promise<User | null> {
+    const supabase = createClient()
     try {
       const { data, error } = await supabase.auth.getUser()
-
       if (error) {
-        // Ignore missing session errors for guests
-        if (error.message === "Auth session missing!") {
-          return null;
+        if (error.message !== "Auth session missing!") {
+          console.error("Error getting current user:", error.message)
         }
-        // This error indicates the user in the JWT doesn't exist in the DB.
-        if (error.message.includes("User from sub claim in JWT does not exist")) {
-          console.warn("User from token not found in DB. Forcing sign-out to clear invalid session.")
-          await this.signOut()
-          return null
-        }
-        // Log only unexpected errors
-        console.error("Error getting current user:", error.message)
         return null
       }
-
       return data.user
     } catch (e) {
-      // Only log unexpected errors
-      if (!(e instanceof Error && e.message === "Auth session missing!")) {
-        console.error("Unexpected error in getCurrentUser:", e)
-      }
-      // Fail-safe sign-out for unexpected errors
-      await this.signOut()
+      console.error("Unexpected error in getCurrentUser:", e)
       return null
     }
   },
@@ -218,6 +187,7 @@ export const authService = {
    * Get user profile with fallback creation
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
+    const supabase = createClient()
     try {
       console.log("Getting user profile for:", userId)
 
@@ -226,12 +196,7 @@ export const authService = {
       if (error) {
         if (error.code === "PGRST116") {
           console.log("User profile not found, attempting to create one")
-
-          // Try to get user info from auth to create profile
-          const {
-            data: { user },
-          } = await supabase.auth.getUser()
-
+          const { data: { user } } = await supabase.auth.getUser()
           if (user && user.id === userId) {
             const newProfile = {
               id: userId,
@@ -240,18 +205,15 @@ export const authService = {
               last_name: user.user_metadata?.last_name || "",
               login_method: "email" as const,
             }
-
             const { data: createdProfile, error: createError } = await supabase
               .from("users")
               .insert(newProfile)
               .select()
               .single()
-
             if (createError) {
               console.error("Failed to create user profile:", createError)
               return null
             }
-
             console.log("Created new user profile:", createdProfile)
             return {
               id: createdProfile.id,
@@ -262,14 +224,12 @@ export const authService = {
               profilePic: createdProfile.profile_pic,
               suburb: createdProfile.suburb,
               city: createdProfile.city,
-              province: createdProfile.province,
-              loginMethod: createdProfile.login_method as "email" | "google" | "facebook" | "apple",
+              province: created.province,
+              loginMethod: createdProfile.login_method as "email" | "google",
             }
           }
-
           return null
         }
-
         console.error("Get user profile error:", error)
         return null
       }
@@ -286,7 +246,7 @@ export const authService = {
         suburb: data.suburb,
         city: data.city,
         province: data.province,
-        loginMethod: data.login_method as "email" | "google" | "facebook" | "apple",
+        loginMethod: data.login_method as "email" | "google",
       }
     } catch (error) {
       console.error("Get user profile error:", error)
@@ -298,18 +258,15 @@ export const authService = {
    * Update user profile with optional profile picture upload
    */
   async updateProfile(userId: string, updates: Partial<UserProfile>, profilePictureFile?: File) {
+    const supabase = createClient()
     try {
       let profilePicUrl = updates.profilePic
-
-      // Upload profile picture if provided
       if (profilePictureFile) {
-        const { storageService } = await import("./supabase")
         profilePicUrl = await storageService.uploadProfilePicture(profilePictureFile, userId)
         if (!profilePicUrl) {
           throw new AuthError("Failed to upload profile picture. The storage service returned an error.")
         }
       }
-
       const { error } = await supabase
         .from("users")
         .update({
@@ -323,7 +280,6 @@ export const authService = {
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId)
-
       if (error) throw new AuthError(handleSupabaseError(error), error.code)
     } catch (error) {
       console.error("Update profile error:", error)
@@ -338,39 +294,25 @@ export const authService = {
    * Subscribe to auth state changes
    */
   onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
+    const supabase = createClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email)
-
-      // On any auth event, we re-validate the user.
-      const user = await this.getCurrentUser()
-      callback(user)
+      callback(session?.user ?? null)
     })
+    return subscription
   },
 
   /**
    * Get session with validation
    */
   async getSession() {
+    const supabase = createClient()
     try {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession()
-
+      const { data: { session }, error } = await supabase.auth.getSession()
       if (error) {
         console.error("Get session error:", error)
         return null
       }
-
-      // Validate session if it exists
-      if (session) {
-        const user = await this.getCurrentUser()
-        if (!user) {
-          console.log("Session validation failed, clearing session")
-          return null
-        }
-      }
-
       return session
     } catch (error) {
       console.error("Get session failed:", error)

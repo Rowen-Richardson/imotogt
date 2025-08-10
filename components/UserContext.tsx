@@ -9,7 +9,7 @@ import type { Vehicle } from "@/types/vehicle"
 import { useRouter } from "next/navigation"
 
 interface UserContextType {
-  user: (User & { session: Session | null }) | null
+  user: User | null
   userProfile: UserProfile | null
   loading: boolean
   listedVehicles: Vehicle[]
@@ -42,13 +42,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ])
       setUserProfile(profile)
       setListedVehicles(userListed)
-      setSavedVehicles(new Set(userSaved.map((v) => v.id))) // Convert to Set of IDs
+      setSavedVehicles(new Set(userSaved.map((v) => v.id)))
     } catch (error) {
       console.error("UserContext: Error fetching user data:", error)
-      // On error, clear out potentially stale data
-      setUserProfile(null)
-      setListedVehicles([])
-      setSavedVehicles(new Set())
+      clearUserData()
     }
   }, [])
 
@@ -59,110 +56,68 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setSavedVehicles(new Set())
   }
 
-  const refreshUser = useCallback(async () => {
-    setLoading(true)
-    try {
-      const currentUser = await authService.getCurrentUser()
-      if (currentUser) {
-        setUser(currentUser)
-        await fetchUserData(currentUser)
-      } else {
-        clearUserData()
-      }
-    } catch (error) {
-      console.error("UserContext: Error refreshing user:", error)
-      clearUserData()
-    } finally {
-      setLoading(false)
-    }
-  }, [fetchUserData])
-
   useEffect(() => {
-    let mounted = true
-    const initializeAuth = async () => {
-      await refreshUser()
-      const {
-        data: { subscription },
-      } = authService.onAuthStateChange(async (supabaseUser) => {
-        if (!mounted) return
-        if (supabaseUser) {
-          setUser(supabaseUser)
-          await fetchUserData(supabaseUser)
-        } else {
-          clearUserData()
-        }
-        setLoading(false)
-      })
-      return () => {
-        subscription?.unsubscribe()
+    setLoading(true);
+    const subscription = authService.onAuthStateChange(async (event, session) => {
+      const supabaseUser = session?.user ?? null;
+      setUser(supabaseUser);
+      if (supabaseUser) {
+        await fetchUserData(supabaseUser);
+      } else {
+        clearUserData();
       }
-    }
-    const cleanupPromise = initializeAuth()
+      setLoading(false);
+    });
+
     return () => {
-      mounted = false
-      cleanupPromise.then((cleanup) => cleanup?.())
-    }
-  }, [refreshUser, fetchUserData])
+      subscription?.unsubscribe();
+    };
+  }, [fetchUserData]);
+
 
   const signIn = async (email: string, password: string) => {
-    setLoading(true)
-    try {
-      const { user: supabaseUser } = await authService.signIn(email, password)
-      if (supabaseUser) {
-        setUser(supabaseUser)
-        await fetchUserData(supabaseUser)
-      }
-    } finally {
-      setLoading(false)
-    }
+    await authService.signIn(email, password)
+    // onAuthStateChange will handle the user update
   }
 
   const signUp = async (email: string, password: string, userData?: Partial<UserProfile>) => {
-    setLoading(true)
-    try {
-      const { user: supabaseUser } = await authService.signUp(email, password, userData)
-      if (supabaseUser) {
-        setUser(supabaseUser)
-        await fetchUserData(supabaseUser)
-      }
-    } finally {
-      setLoading(false)
-    }
+    await authService.signUp(email, password, userData)
+    // onAuthStateChange will handle the user update
   }
 
   const signOut = async () => {
-    setLoading(true)
-    try {
-      await authService.signOut()
-      clearUserData()
-      router.push("/")
-    } catch (error) {
-      console.error("UserContext: Error during sign out:", error)
-      clearUserData()
-      router.push("/")
-    } finally {
-      setLoading(false)
-    }
+    await authService.signOut()
+    clearUserData()
+    router.push("/")
   }
 
   const updateProfile = async (updates: Partial<UserProfile>, profilePictureFile?: File) => {
     if (!user) throw new Error("No user logged in")
-    setLoading(true)
-    try {
-      await authService.updateProfile(user.id, updates, profilePictureFile)
-      const updatedProfile = await authService.getUserProfile(user.id)
-      setUserProfile(updatedProfile)
-    } finally {
-      setLoading(false)
-    }
+    await authService.updateProfile(user.id, updates, profilePictureFile)
+    const updatedProfile = await authService.getUserProfile(user.id)
+    setUserProfile(updatedProfile)
   }
+
+  const refreshUser = useCallback(async () => {
+    // This function can be used to manually trigger a refresh if needed
+    setLoading(true);
+    const session = await authService.getSession();
+    const supabaseUser = session?.user ?? null;
+    setUser(supabaseUser);
+    if (supabaseUser) {
+      await fetchUserData(supabaseUser);
+    } else {
+      clearUserData();
+    }
+    setLoading(false);
+  }, [fetchUserData]);
 
   const toggleSaveVehicle = async (vehicle: Vehicle) => {
     if (!user) {
       router.push("/login")
       return
     }
-    const isSaved = savedVehicles.has(vehicle.id) // Use .has() for Set
+    const isSaved = savedVehicles.has(vehicle.id)
     if (isSaved) {
       setSavedVehicles((prev) => {
         const newSet = new Set(prev)
@@ -171,7 +126,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       })
       await vehicleService.unsaveVehicle(user.id, vehicle.id)
     } else {
-      setSavedVehicles((prev) => new Set(prev).add(vehicle.id)) // Add to Set
+      setSavedVehicles((prev) => new Set(prev).add(vehicle.id))
       await vehicleService.saveVehicle(user.id, vehicle.id)
     }
   }

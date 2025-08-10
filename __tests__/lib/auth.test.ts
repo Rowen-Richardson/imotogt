@@ -1,36 +1,36 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 import { authService, AuthError } from "@/lib/auth"
+import { createClient } from "@/utils/supabase/client"
 
-// Mock Supabase
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    auth: {
-      signUp: vi.fn(),
-      signInWithPassword: vi.fn(),
-      signInWithOAuth: vi.fn(),
-      signOut: vi.fn(),
-      resetPasswordForEmail: vi.fn(),
-      updateUser: vi.fn(),
-      getUser: vi.fn(),
-      onAuthStateChange: vi.fn(),
-    },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(),
-        })),
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(),
-      })),
-    })),
-  },
+// Mock the client creation utility
+vi.mock("@/utils/supabase/client")
+
+// Mock the error handler
+vi.mock("@/lib/error-handler", () => ({
   handleSupabaseError: vi.fn((error) => error.message),
 }))
 
+// Mock the storage service (auth service uses it for profile pics)
+vi.mock("@/lib/storage-service", () => ({
+    storageService: {
+        uploadProfilePicture: vi.fn(),
+    }
+}))
+
+
 describe("AuthService", () => {
+  let supabase: any;
+
   beforeEach(() => {
     vi.clearAllMocks()
+    supabase = {
+        auth: {
+          signUp: vi.fn(),
+          signInWithPassword: vi.fn(),
+          signOut: vi.fn(),
+        },
+    };
+    vi.mocked(createClient).mockReturnValue(supabase)
   })
 
   describe("signUp", () => {
@@ -38,8 +38,7 @@ describe("AuthService", () => {
       const mockUser = { id: "123", email: "test@example.com" }
       const mockSession = { access_token: "token" }
 
-      const { supabase } = await import("@/lib/supabase")
-      vi.mocked(supabase.auth.signUp).mockResolvedValue({
+      supabase.auth.signUp.mockResolvedValue({
         data: { user: mockUser, session: mockSession },
         error: null,
       })
@@ -61,8 +60,7 @@ describe("AuthService", () => {
     })
 
     it("should throw AuthError on sign up failure", async () => {
-      const { supabase } = await import("@/lib/supabase")
-      vi.mocked(supabase.auth.signUp).mockResolvedValue({
+      supabase.auth.signUp.mockResolvedValue({
         data: { user: null, session: null },
         error: { message: "Email already exists" },
       })
@@ -76,8 +74,7 @@ describe("AuthService", () => {
       const mockUser = { id: "123", email: "test@example.com" }
       const mockSession = { access_token: "token" }
 
-      const { supabase } = await import("@/lib/supabase")
-      vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      supabase.auth.signInWithPassword.mockResolvedValue({
         data: { user: mockUser, session: mockSession },
         error: null,
       })
@@ -89,8 +86,7 @@ describe("AuthService", () => {
     })
 
     it("should throw AuthError on invalid credentials", async () => {
-      const { supabase } = await import("@/lib/supabase")
-      vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      supabase.auth.signInWithPassword.mockResolvedValue({
         data: { user: null, session: null },
         error: { message: "Invalid credentials" },
       })
@@ -101,9 +97,7 @@ describe("AuthService", () => {
 
   describe("signOut", () => {
     it("should successfully sign out", async () => {
-      const { supabase } = await import("@/lib/supabase")
-      vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null })
-
+      supabase.auth.signOut.mockResolvedValue({ error: null })
       await expect(authService.signOut()).resolves.not.toThrow()
     })
   })
