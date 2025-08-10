@@ -13,42 +13,26 @@ import type { Vehicle } from "@/types/vehicle"
 import type { UserProfile } from "@/types/user"; // Import UserProfile from shared types
 
 interface DashboardProps {
-  user: UserProfile
+  user: UserProfile; // Use the imported UserProfile type
   onSignOut: () => void
   onBack: () => void
-  savedCars?: Vehicle[]
-  onViewProfileSettings: () => void
-  onViewUploadVehicle: () => void
-  onUserUpdate: (updatedData: Partial<UserProfile>) => void
-  onEditListedCar?: (vehicle: Vehicle) => void
-  onDeleteListedCar?: (vehicle: Vehicle) => void
-  listedCars?: Vehicle[]
-  onSaveCar?: (vehicle: Vehicle) => void
-  onLoginClick: () => void
-  onGoHome: () => void
-  onShowAllCars: () => void
-  onGoToSellPage: () => void
-  onNavigateToUpload: () => void
-  onViewDetails: (vehicle: Vehicle) => void
+  savedCars?: Vehicle[] // Add saved cars prop
+  onViewProfileSettings: () => void // Add callback for viewing profile settings
+  onViewUploadVehicle: () => void; // Add callback for viewing vehicle upload page
+  onUserUpdate: (updatedData: Partial<UserProfile>) => void; // Add onUserUpdate prop
+  onEditListedCar?: (vehicle: Vehicle) => void; // Add callback for editing a listed car // Keep this line
+  onDeleteListedCar?: (vehicle: Vehicle) => void; // Add callback for deleting a listed car
+  listedCars?: Vehicle[]; // Add listed cars prop for the recently listed section
+  onSaveCar?: (vehicle: Vehicle) => void; // Add callback for saving/unsaving cars
+  // Add Header navigation props (onSignOut was already present)
+  onLoginClick: () => void;
+  onGoHome: () => void;
+  onShowAllCars: () => void;
+  onGoToSellPage: () => void;
+  onNavigateToUpload: () => void;
 }
 
-export default function Dashboard({
-  user,
-  onSignOut,
-  onBack,
-  savedCars = [],
-  listedCars = [],
-  onViewProfileSettings,
-  onViewUploadVehicle,
-  onSaveCar,
-  onEditListedCar,
-  onDeleteListedCar,
-  onLoginClick,
-  onGoHome,
-  onShowAllCars,
-  onGoToSellPage,
-  onViewDetails,
-}: DashboardProps) {
+export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewProfileSettings, onViewUploadVehicle, onSaveCar, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
   // --- State and hooks ---
   const router = useRouter();
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
@@ -292,10 +276,7 @@ export default function Dashboard({
                     <div className="flex justify-between items-end">
                       {savedCars.length > 0 ? (
                         <>
-                          <div
-                            className="text-white cursor-pointer"
-                            onClick={() => onViewDetails(savedCars[currentCarIndex])}
-                          >
+                          <Link href={`/vehicle/${savedCars[currentCarIndex]?.id}`} className="text-white">
                             <h3 className="text-2xl font-bold mb-1">
                               {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
                               {savedCars[currentCarIndex]?.model}
@@ -304,7 +285,7 @@ export default function Dashboard({
                               {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
                             </p>
                             <p className="text-xl font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
-                          </div>
+                          </Link>
                           <Button
                             className="bg-white text-[#3E5641] hover:bg-white/90"
                             onClick={() => {

@@ -213,7 +213,7 @@ export function Header({
                   <User className="w-4 h-4 text-white" />
                 </div>
               )}
-              <span className="font-medium">Login</span>
+              <span className="font-medium">{isLoggedIn ? `Hi, ${userProfile?.firstName || 'User'}` : 'Login'}</span>
             </button>
           </div>
 
