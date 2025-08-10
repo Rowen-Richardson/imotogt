@@ -41,6 +41,9 @@ vi.mock("@/lib/supabase", () => ({
       })),
     })),
   },
+  storageService: {
+    uploadVehicleImagesFromBase64: vi.fn().mockResolvedValue(["http://example.com/image.jpg"]),
+  },
 }))
 
 describe("VehicleService", () => {
@@ -81,18 +84,10 @@ describe("VehicleService", () => {
       }
 
       vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          ilike: vi.fn().mockReturnThis(),
-          gte: vi.fn().mockReturnThis(),
-          lte: vi.fn().mockReturnThis(),
-          in: vi.fn().mockReturnThis(),
-          or: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({
-            data: mockVehicles,
-            error: null,
-            count: 1,
-          }),
+        select: vi.fn().mockResolvedValue({
+          data: mockVehicles,
+          error: null,
+          count: 1,
         }),
       } as any)
 
@@ -115,18 +110,10 @@ describe("VehicleService", () => {
       }
 
       vi.mocked(supabase.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          ilike: vi.fn().mockReturnThis(),
-          gte: vi.fn().mockReturnThis(),
-          lte: vi.fn().mockReturnThis(),
-          in: vi.fn().mockReturnThis(),
-          or: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({
-            data: null,
-            error: { message: "Database error", code: "DB_ERROR" },
-            count: null,
-          }),
+        select: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: "Database error", code: "DB_ERROR" },
+          count: null,
         }),
       } as any)
 
@@ -156,16 +143,30 @@ describe("VehicleService", () => {
       }
 
       const { supabase } = await import("@/lib/supabase")
-      vi.mocked(supabase.from).mockReturnValue({
-        insert: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
-              data: mockVehicle,
-              error: null,
-            }),
-          }),
-        }),
-      } as any)
+      const mockUserProfile = { id: "user123", first_name: "John", last_name: "Doe", email: "john@example.com", phone: "123-456-7890" };
+      const mockUpdatedVehicle = { ...mockVehicle, images: ["http://example.com/image.jpg"] };
+
+      vi.mocked(supabase.from).mockImplementation((table: string) => {
+        if (table === "users") {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            single: vi.fn().mockResolvedValue({ data: mockUserProfile, error: null }),
+          } as any;
+        }
+        if (table === "vehicles") {
+          return {
+            insert: vi.fn().mockReturnThis(),
+            update: vi.fn().mockReturnThis(),
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            single: vi.fn()
+              .mockResolvedValueOnce({ data: mockVehicle, error: null }) // After insert
+              .mockResolvedValueOnce({ data: mockUpdatedVehicle, error: null }), // After update
+          } as any;
+        }
+        return {} as any;
+      });
 
       const vehicleData = {
         userId: "user123",

@@ -1,6 +1,16 @@
 import { supabase, storageService } from "./supabase"
 import type { Vehicle } from "@/types/vehicle"
 
+export class VehicleError extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+  ) {
+    super(message)
+    this.name = "VehicleError"
+  }
+}
+
 type VehiclePayload = Omit<Vehicle, "id" | "createdAt" | "updatedAt" | "images"> & {
   userId: string
   images: string[]
@@ -10,10 +20,11 @@ export const vehicleService = {
   /**
    * Fetch all vehicles with optional filters
    */
-  async getVehicles(filters: any = {}): Promise<Vehicle[]> {
-    const { data, error } = await supabase
+  async getVehicles(filters: any = {}): Promise<{ vehicles: Vehicle[]; total: number }> {
+    let query = supabase
       .from("vehicles")
-      .select(`
+      .select(
+        `
         *,
         users!vehicles_user_id_fkey (
           id,
@@ -26,15 +37,27 @@ export const vehicleService = {
           province,
           profile_pic
         )
-      `);
+      `,
+        { count: "exact" },
+      )
+
+    if (filters.query) {
+      const searchTerms = filters.query.split(" ").filter(Boolean)
+      if (searchTerms.length > 0) {
+        const orFilters = searchTerms.map((term: string) => `make.ilike.%${term}%,model.ilike.%${term}%`).join(",")
+        query = query.or(orFilters)
+      }
+    }
+
+    const { data, error, count } = await query
 
     if (error) {
       console.error("Error fetching vehicles:", error)
-      return []
+      throw new VehicleError("Failed to fetch vehicles", "DB_ERROR")
     }
 
     if (data) {
-      return data.map(item => {
+      const vehicles = data.map(item => {
         const userData = item.users;
         // Extract and transform fields first
         const {
@@ -69,9 +92,10 @@ export const vehicleService = {
         };
         return vehicle as Vehicle;
       });
+      return { vehicles, total: count || 0 };
     }
 
-    return [];
+    return { vehicles: [], total: 0 };
   },
 
   /**

@@ -9,9 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Header } from "./ui/header"
 import LikedCarsPage from "@/components/liked-cars-page"
-import VehicleDetails from "./vehicle-details"
-import { vehicles } from "@/lib/data"
-import type { Vehicle } from "@/lib/data"
+import type { Vehicle } from "@/types/vehicle"
 import type { UserProfile } from "@/types/user"; // Import UserProfile from shared types
 
 interface DashboardProps {
@@ -19,7 +17,6 @@ interface DashboardProps {
   onSignOut: () => void
   onBack: () => void
   savedCars?: Vehicle[] // Add saved cars prop
-  onViewDetails?: (vehicle: Vehicle) => void // Add callback for viewing details
   onViewProfileSettings: () => void // Add callback for viewing profile settings
   onViewUploadVehicle: () => void; // Add callback for viewing vehicle upload page
   onUserUpdate: (updatedData: Partial<UserProfile>) => void; // Add onUserUpdate prop
@@ -35,10 +32,9 @@ interface DashboardProps {
   onNavigateToUpload: () => void;
 }
 
-export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewDetails, onViewProfileSettings, onViewUploadVehicle, onSaveCar, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
+export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewProfileSettings, onViewUploadVehicle, onSaveCar, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
   // --- State and hooks ---
   const router = useRouter();
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
 
   // Auto-rotate carousel
@@ -49,15 +45,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
     }, 5000);
     return () => clearInterval(interval);
   }, [savedCars.length]);
-
-  // Handle viewing vehicle details
-  const handleViewDetails = (vehicle: Vehicle) => {
-    if (onViewDetails) {
-      onViewDetails(vehicle);
-    } else {
-      setSelectedVehicle(vehicle);
-    }
-  };
 
   // Debug: Log user prop to verify updates
   console.log('[Dashboard] user:', user);
@@ -75,17 +62,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
   // --- Top-level conditional returns ---
   if (!user) {
     return <div className="min-h-screen flex items-center justify-center text-xl">User not logged in.</div>;
-  }
-  if (selectedVehicle) {
-    return (
-      <VehicleDetails
-        vehicle={selectedVehicle}
-        onBack={() => setSelectedVehicle(null)}
-        user={user}
-        savedCars={savedCars}
-        onSaveCar={onSaveCar}
-      />
-    );
   }
   return (
     <div className="h-screen bg-white flex flex-col">
@@ -300,10 +276,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     <div className="flex justify-between items-end">
                       {savedCars.length > 0 ? (
                         <>
-                          <div
-                            className="text-white cursor-pointer"
-                            onClick={() => handleViewDetails(savedCars[currentCarIndex])}
-                          >
+                          <Link href={`/vehicle/${savedCars[currentCarIndex]?.id}`} className="text-white">
                             <h3 className="text-2xl font-bold mb-1">
                               {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
                               {savedCars[currentCarIndex]?.model}
@@ -312,7 +285,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                               {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
                             </p>
                             <p className="text-xl font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
-                          </div>
+                          </Link>
                           <Button
                             className="bg-white text-[#3E5641] hover:bg-white/90"
                             onClick={() => {
@@ -372,10 +345,10 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                 <div className="flex-grow overflow-auto p-3">
                   {listedCars.length > 0 ? (
                     listedCars.map((vehicle) => (
-                      <div
+                      <Link
                         key={vehicle.id}
-                        className="flex items-center gap-3 p-3 mb-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
-                        onClick={() => handleViewDetails(vehicle)} // Add click handler to view details
+                        href={`/vehicle/${vehicle.id}`}
+                        className="flex items-center gap-3 p-3 mb-2 rounded-xl hover:bg-gray-50 transition-colors"
                       >
                         <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                           <img
@@ -414,7 +387,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                             </Button>
                           )}
                         </div>
-                      </div>
+                      </Link>
                     ))
                   ) : (
                     <div className="text-center text-gray-500 py-8">
