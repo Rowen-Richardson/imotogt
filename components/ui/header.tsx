@@ -31,7 +31,6 @@ export function Header({
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const [loginToggle, setLoginToggle] = useState(false)
   const router = useRouter()
   const { user: authUser, userProfile, signOut: contextSignOut } = useUser()
   const isMobile = useMobile()
@@ -189,11 +188,10 @@ export function Header({
           <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => {
-                setLoginToggle((prev) => !prev)
-                if (!loginToggle) {
+                if (isLoggedIn) {
                   router.push("/dashboard")
                 } else {
-                  router.push("/home")
+                  router.push("/login")
                 }
               }}
               className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors font-medium rounded-full px-4 py-2"
