@@ -25,6 +25,7 @@ vi.mock("@/lib/supabase", () => ({
       })),
     })),
   },
+  handleSupabaseError: vi.fn((error) => error.message),
 }))
 
 describe("AuthService", () => {
@@ -52,8 +53,8 @@ describe("AuthService", () => {
         password: "password123",
         options: {
           data: {
-            first_name: undefined,
-            last_name: undefined,
+            first_name: "",
+            last_name: "",
           },
         },
       })

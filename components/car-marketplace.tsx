@@ -5,10 +5,9 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import { Search, X, ChevronDown, Truck, CarIcon, Bike, Facebook, Instagram, Twitter } from "lucide-react"
-import VehicleDetails from "./vehicle-details"
 import LocationPage from "./location-page"
 import { vehicleService } from "@/lib/vehicle-service"
-import type { Vehicle } from "@/lib/data"
+import type { Vehicle } from "@/types/vehicle"
 import { useUser } from "@/components/UserContext"
 import { Header } from "./ui/header"
 import { VehicleCard } from "./ui/vehicle-card"
@@ -48,7 +47,6 @@ export default function CarMarketplace() {
   const { user, setUser } = useUser()
   const [search, setSearch] = useState("")
   const [showMoreOptions, setShowMoreOptions] = useState(false)
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([])
@@ -122,9 +120,9 @@ export default function CarMarketplace() {
 
   useEffect(() => {
     const fetchVehicles = async () => {
-      const fetchedVehicles = await vehicleService.getVehicles()
-      setAllVehicles(fetchedVehicles)
-      setFilteredVehicles(fetchedVehicles)
+      const { vehicles } = await vehicleService.getVehicles()
+      setAllVehicles(vehicles)
+      setFilteredVehicles(vehicles)
     }
     fetchVehicles()
   }, [])
@@ -283,13 +281,11 @@ export default function CarMarketplace() {
     onDashboardClick: () => router.push("/dashboard"),
     onGoHome: () => {
       setIsSearchPage(true)
-      setSelectedVehicle(null)
       setSelectedProvince(null)
     },
     onShowAllCars: () => {
       setFilteredVehicles(allVehicles)
       setIsSearchPage(false)
-      setSelectedVehicle(null)
       setSelectedProvince(null)
     },
     onGoToSellPage: () => router.push("/upload-vehicle"),
@@ -314,22 +310,6 @@ export default function CarMarketplace() {
     )
   }
 
-  if (selectedVehicle) {
-    return (
-      <>
-        <Header user={user} {...navigationHandlers} />
-        <div className="pt-16 md:pt-20">
-          <VehicleDetails
-            vehicle={selectedVehicle}
-            onBack={() => setSelectedVehicle(null)}
-            user={user}
-            savedCars={savedCars}
-            onSaveCar={handleSaveCar}
-          />
-        </div>
-      </>
-    )
-  }
 
   // Main Search Page or Results Page
   return (
@@ -733,7 +713,6 @@ export default function CarMarketplace() {
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}
-                    onViewDetails={() => setSelectedVehicle(vehicle)}
                     isSaved={savedCars.some((saved) => saved.id === vehicle.id)}
                     onToggleSave={() => handleSaveCar(vehicle)}
                     isLoggedIn={!!user}

@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { Header } from "@/components/ui/header"
 import AdvancedFilters from "@/components/advanced-filters"
 import VehicleCard from "@/components/vehicle-card"
-import VehicleDetails from "@/components/vehicle-details"
 import { useUser } from "@/components/UserContext"
 import { vehicleService } from "@/lib/vehicle-service"
 import type { Vehicle } from "@/types/vehicle"
@@ -18,7 +17,6 @@ export default function ResultsPage() {
 
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
 
   const [filters, setFilters] = useState(() => {
     const params = new URLSearchParams(searchParams)
@@ -42,9 +40,9 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetchAndSetVehicles = async () => {
       setLoading(true)
-      const data = await vehicleService.getVehicles(filters) // Pass filters here
-      if (data) {
-        setAllVehicles(data)
+      const { vehicles } = await vehicleService.getVehicles(filters)
+      if (vehicles) {
+        setAllVehicles(vehicles)
       } else {
         console.error("Error fetching vehicles:")
       }
@@ -87,22 +85,6 @@ export default function ResultsPage() {
     onSignOut: handleSignOut,
   }
 
-  if (selectedVehicle) {
-    return (
-      <>
-        <Header user={user} {...navigationHandlers} />
-        <div className="pt-16 md:pt-20">
-          <VehicleDetails
-            vehicle={selectedVehicle}
-            onBack={() => setSelectedVehicle(null)}
-            user={user}
-            isSaved={savedVehicles.has(selectedVehicle.id)}
-            onToggleSave={() => toggleSaveVehicle(selectedVehicle)}
-          />
-        </div>
-      </>
-    )
-  }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -142,8 +124,7 @@ export default function ResultsPage() {
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}
-                    onViewDetails={() => setSelectedVehicle(vehicle)}
-                    isSaved={savedVehicles.has(vehicle.id)}
+                    isSaved={savedVehicles.some((v) => v.id === vehicle.id)}
                     onToggleSave={() => toggleSaveVehicle(vehicle)}
                     isLoggedIn={!!user}
                   />
