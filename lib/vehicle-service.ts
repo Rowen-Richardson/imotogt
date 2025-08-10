@@ -21,9 +21,10 @@ export const vehicleService = {
    * Fetch all vehicles with optional filters
    */
   async getVehicles(filters: any = {}): Promise<{ vehicles: Vehicle[]; total: number }> {
-    const { data, error, count } = await supabase
+    let query = supabase
       .from("vehicles")
-      .select(`
+      .select(
+        `
         *,
         users!vehicles_user_id_fkey (
           id,
@@ -36,7 +37,19 @@ export const vehicleService = {
           province,
           profile_pic
         )
-      `, { count: 'exact' });
+      `,
+        { count: "exact" },
+      )
+
+    if (filters.query) {
+      const searchTerms = filters.query.split(" ").filter(Boolean)
+      if (searchTerms.length > 0) {
+        const orFilters = searchTerms.map((term: string) => `make.ilike.%${term}%,model.ilike.%${term}%`).join(",")
+        query = query.or(orFilters)
+      }
+    }
+
+    const { data, error, count } = await query
 
     if (error) {
       console.error("Error fetching vehicles:", error)
