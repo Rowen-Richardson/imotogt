@@ -1,4 +1,4 @@
-"use client"
+"use client" /*Base for commit*/
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Menu, Car, Heart, Settings, LogOut, User, X } from "lucide-react"
