@@ -31,6 +31,7 @@ export function Header({
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [loginToggle, setLoginToggle] = useState(false)
   const router = useRouter()
   const { user: authUser, userProfile, signOut: contextSignOut } = useUser()
   const isMobile = useMobile()
@@ -188,10 +189,11 @@ export function Header({
           <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => {
-                if (isLoggedIn) {
+                setLoginToggle((prev) => !prev)
+                if (!loginToggle) {
                   router.push("/dashboard")
                 } else {
-                  router.push("/login")
+                  router.push("/home")
                 }
               }}
               className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors font-medium rounded-full px-4 py-2"
@@ -211,7 +213,7 @@ export function Header({
                   <User className="w-4 h-4 text-white" />
                 </div>
               )}
-              <span className="font-medium">{isLoggedIn ? `Hi, ${userProfile?.firstName || 'User'}` : 'Login'}</span>
+              <span className="font-medium">Login</span>
             </button>
           </div>
 

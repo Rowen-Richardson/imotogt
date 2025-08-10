@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image" // Added for user profile picture
-import Link from "next/link"
 import { Plus, Edit, Eye, Heart, MessageSquare, Car, Package } from "lucide-react"
 import { Trash2 } from "lucide-react" // Import the Trash2 icon
 import { Button } from "@/components/ui/button"
@@ -276,7 +275,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     <div className="flex justify-between items-end">
                       {savedCars.length > 0 ? (
                         <>
-                          <Link href={`/vehicle/${savedCars[currentCarIndex]?.id}`} className="text-white">
+                          <a href={`/vehicle/${savedCars[currentCarIndex]?.id}`} className="text-white">
                             <h3 className="text-2xl font-bold mb-1">
                               {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
                               {savedCars[currentCarIndex]?.model}
@@ -285,7 +284,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                               {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
                             </p>
                             <p className="text-xl font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
-                          </Link>
+                          </a>
                           <Button
                             className="bg-white text-[#3E5641] hover:bg-white/90"
                             onClick={() => {
@@ -345,7 +344,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                 <div className="flex-grow overflow-auto p-3">
                   {listedCars.length > 0 ? (
                     listedCars.map((vehicle) => (
-                      <Link
+                      <a
                         key={vehicle.id}
                         href={`/vehicle/${vehicle.id}`}
                         className="flex items-center gap-3 p-3 mb-2 rounded-xl hover:bg-gray-50 transition-colors"
@@ -387,7 +386,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                             </Button>
                           )}
                         </div>
-                      </Link>
+                      </a>
                     ))
                   ) : (
                     <div className="text-center text-gray-500 py-8">

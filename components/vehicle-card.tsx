@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-import Link from "next/link"
 import Image from "next/image"
 import { Heart } from "lucide-react"
 import type { Vehicle } from "@/types/vehicle"
@@ -51,7 +50,7 @@ export default function VehicleCard({ vehicle, isSaved, onToggleSave, isLoggedIn
   }
 
   return (
-    <Link href={`/vehicle/${vehicle.id}`} className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden group">
+    <a href={`/vehicle/${vehicle.id}`} className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden group">
       <div
         className="flex flex-col overflow-hidden group"
       >
@@ -89,6 +88,6 @@ export default function VehicleCard({ vehicle, isSaved, onToggleSave, isLoggedIn
           </div>
         </div>
       </div>
-    </Link>
+    </a>
   )
 }
