@@ -310,7 +310,6 @@ export default function CarMarketplace() {
     )
   }
 
-
   // Main Search Page or Results Page
   return (
     <div className="min-h-screen bg-[var(--light-bg)] dark:bg-[var(--dark-bg)]">

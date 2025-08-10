@@ -1,43 +1,32 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image" // Added for user profile picture
+import Image from "next/image"
 import Link from "next/link"
 import { Plus, Edit, Eye, Heart, MessageSquare, Car, Package } from "lucide-react"
-import { Trash2 } from "lucide-react" // Import the Trash2 icon
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Header } from "./ui/header"
-import LikedCarsPage from "@/components/liked-cars-page"
 import type { Vehicle } from "@/types/vehicle"
-import type { UserProfile } from "@/types/user"; // Import UserProfile from shared types
+import type { UserProfile } from "@/types/user"
 
 interface DashboardProps {
-  user: UserProfile; // Use the imported UserProfile type
-  onSignOut: () => void
-  onBack: () => void
-  savedCars?: Vehicle[] // Add saved cars prop
-  onViewProfileSettings: () => void // Add callback for viewing profile settings
-  onViewUploadVehicle: () => void; // Add callback for viewing vehicle upload page
-  onUserUpdate: (updatedData: Partial<UserProfile>) => void; // Add onUserUpdate prop
-  onEditListedCar?: (vehicle: Vehicle) => void; // Add callback for editing a listed car // Keep this line
-  onDeleteListedCar?: (vehicle: Vehicle) => void; // Add callback for deleting a listed car
-  listedCars?: Vehicle[]; // Add listed cars prop for the recently listed section
-  onSaveCar?: (vehicle: Vehicle) => void; // Add callback for saving/unsaving cars
-  // Add Header navigation props (onSignOut was already present)
+  user: UserProfile;
+  onSignOut: () => void;
+  onBack: () => void;
+  savedCars?: Vehicle[];
+  onViewProfileSettings: () => void;
+  onViewUploadVehicle: () => void;
+  listedCars?: Vehicle[];
   onLoginClick: () => void;
   onGoHome: () => void;
   onShowAllCars: () => void;
-  onGoToSellPage: () => void;
-  onNavigateToUpload: () => void;
 }
 
-export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewProfileSettings, onViewUploadVehicle, onSaveCar, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
-  // --- State and hooks ---
+export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewProfileSettings, onViewUploadVehicle, onLoginClick, onGoHome, onShowAllCars }: DashboardProps) {
   const router = useRouter();
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
 
-  // Auto-rotate carousel
   useEffect(() => {
     if (savedCars.length <= 1) return;
     const interval = setInterval(() => {
@@ -46,53 +35,39 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
     return () => clearInterval(interval);
   }, [savedCars.length]);
 
-  // Debug: Log user prop to verify updates
-  console.log('[Dashboard] user:', user);
-
-  // User metrics derived from props or other state
   const totalListings = listedCars.length;
-  const maxFreeListings = 5; // Assuming 5 is the limit for the free plan
+  const maxFreeListings = 5;
   const freeListingsRemaining = Math.max(0, maxFreeListings - totalListings);
   const userMetrics = {
-    listingViews: 243, // Placeholder
-    saves: 18, // Placeholder
-    contacts: 7, // Placeholder
+    listingViews: 243,
+    saves: 18,
+    contacts: 7,
   };
 
-  // --- Top-level conditional returns ---
   if (!user) {
     return <div className="min-h-screen flex items-center justify-center text-xl">User not logged in.</div>;
   }
+
   return (
     <div className="h-screen bg-white flex flex-col">
-      {/* Top Header Section */}
       <Header
         user={user}
-        onLoginClick={() => { /* Optionally handle login click in dashboard */ }}
-        onDashboardClick={onBack} // This correctly goes back to the main dashboard view state
-        onGoHome={onGoHome} // Use the prop passed from CarMarketplace
-        onShowAllCars={onShowAllCars} // Use the prop passed from CarMarketplace
+        onLoginClick={onLoginClick}
+        onDashboardClick={onBack}
+        onGoHome={onGoHome}
+        onShowAllCars={onShowAllCars}
         onGoToSellPage={onViewUploadVehicle}
         onSignOut={onSignOut}
         transparent={false}
       />
-
-      {/* Main Content Area: Fills remaining space */}
       <main className="flex-1 px-6 pb-6 overflow-auto pt-20">
         <h1 className="text-4xl font-bold mb-6">
           Welcome, {user.firstName}
         </h1>
-
-        {/* Center container for the entire grid */}
         <div className="w-full mx-auto h-full">
-          {/* Outer grid: 12 columns, spans full height */}
           <div className="grid grid-cols-12 gap-4 h-full">
-            {/* LEFT COLUMN (9 of 12): uses 2-row structure */}
             <div className="col-span-9 grid grid-rows-[1fr_1fr] gap-4 h-full">
-              {/* ROW 1: Profile, Progress, Vehicle Uploads */}
               <div className="grid grid-cols-3 gap-4">
-                {/* Profile Card */}
-                {/* Changed from Link to div with onClick to handle view state in parent */}
                 <div
                   className="col-span-1 block min-w-0"
                   onClick={onViewProfileSettings}
@@ -126,8 +101,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     </div>
                   </Card>
                 </div>
-
-                {/* Progress Card - Enhanced metrics display */}
                 <Card className="rounded-3xl p-5 w-full h-full flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
                   <div>
                     <div className="flex justify-between items-center mb-4">
@@ -138,10 +111,9 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     </div>
                     <div className="mb-4 flex items-end gap-2 filter blur-sm">
                       <div className="text-3xl font-bold text-[#3E5641]">{totalListings}</div>
-                      <div className="text-lg font-medium text-[#6F7F69] pb-0.5">Total Views</div> {/* Changed to reflect the metric shown */}
+                      <div className="text-lg font-medium text-[#6F7F69] pb-0.5">Total Views</div>
                     </div>
                   </div>
-
                   <div className="space-y-4">
                     <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                       <div className="flex justify-between items-center mb-2">
@@ -155,7 +127,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                         <div className="h-full bg-[#FF6700] rounded-full" style={{ width: "70%" }}></div>
                       </div>
                     </div>
-
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col">
                         <div className="flex items-center justify-between mb-1">
@@ -167,7 +138,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                           <div className="text-xs text-[#6F7F69]">Saved by users</div>
                         </div>
                       </div>
-
                       <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col">
                         <div className="flex items-center justify-between mb-1">
                           <MessageSquare className="w-4 h-4 text-blue-500" />
@@ -181,9 +151,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     </div>
                   </div>
                 </Card>
-
-                {/* Vehicle Uploads Card - Transformed from Time Tracker */}
-                {/* Added onClick handler to navigate to the upload page */}
                 <Card className="rounded-3xl p-5 w-full h-full flex flex-col justify-between bg-gradient-to-br from-[#FF6700] to-[#FF9248] text-white cursor-pointer hover:shadow-lg transition-all" onClick={onViewUploadVehicle}>
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-semibold">Vehicle Uploads</h3>
@@ -200,10 +167,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                   </div>
                 </Card>
               </div>
-
-              {/* ROW 2: Subscription (3 columns) and Featured Car (6 columns) */}
               <div className="grid grid-cols-9 gap-4">
-                {/* Subscription Card - Repurposed from Pension */}
                 <Card className="col-span-3 rounded-3xl w-full h-full flex flex-col">
                   <div className="p-5 border-b">
                     <div className="flex justify-between items-center">
@@ -231,7 +195,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                         {freeListingsRemaining} free listings remaining
                       </p>
                     </div>
-
                     <div className="border border-dashed border-gray-300 rounded-xl p-4">
                       <h4 className="font-medium mb-2">Premium Plans</h4>
                       <p className="text-sm text-gray-500 mb-3">Unlock unlimited listings and premium features</p>
@@ -241,8 +204,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     </div>
                   </div>
                 </Card>
-
-                {/* Featured Car Card - Replaces Calendar */}
                 <Card className="col-span-6 rounded-3xl overflow-hidden w-full h-full relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
                   <img
@@ -272,7 +233,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                         </span>
                       )}
                     </div>
-
                     <div className="flex justify-between items-end">
                       {savedCars.length > 0 ? (
                         <>
@@ -289,7 +249,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                           <Button
                             className="bg-white text-[#3E5641] hover:bg-white/90"
                             onClick={() => {
-                              // Open contact form or modal
                               if (savedCars[currentCarIndex]) {
                                 window.open(
                                   `mailto:${savedCars[currentCarIndex].sellerEmail}?subject=Inquiry about your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model}&body=Hello ${savedCars[currentCarIndex].sellerName},%0D%0A%0D%0AI am interested in your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model} listed for ${savedCars[currentCarIndex].price}.%0D%0A%0D%0APlease contact me with more information.%0D%0A%0D%0AThank you.`,
@@ -311,8 +270,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                         </div>
                       )}
                     </div>
-
-                    {/* Carousel indicators */}
                     {savedCars.length > 1 && (
                       <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
                         {savedCars.map((_, index) => (
@@ -331,30 +288,30 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                 </Card>
               </div>
             </div>
-
-            {/* RIGHT COLUMN (3 of 12): Recently Listed Cars */}
             <div className="col-span-3 h-full">
               <Card className="rounded-3xl w-full h-full flex flex-col">
                 <div className="p-5 border-b flex justify-between items-center">
                   <h3 className="text-xl font-semibold">Recently Listed Cars</h3>
-                  <Button variant="ghost" size="sm" className="text-[#FF6700]">
-                    View All
-                  </Button>
+                  <Link href="/dashboard/my-listings">
+                    <Button variant="ghost" size="sm" className="text-[#FF6700] hover:text-orange-600">
+                        View All
+                    </Button>
+                  </Link>
                 </div>
-
                 <div className="flex-grow overflow-auto p-3">
                   {listedCars.length > 0 ? (
                     listedCars.map((vehicle) => (
                       <Link
                         key={vehicle.id}
                         href={`/vehicle/${vehicle.id}`}
-                        className="flex items-center gap-3 p-3 mb-2 rounded-xl hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-4 p-3 mb-2 rounded-xl hover:bg-gray-50 transition-colors"
                       >
-                        <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                          <img
-                            src={vehicle.image || "/placeholder.svg"}
+                        <div className="w-24 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 relative">
+                          <Image
+                            src={vehicle.images?.[0] || "/placeholder.svg"}
                             alt={`${vehicle.make} ${vehicle.model}`}
-                            className="w-full h-full object-cover"
+                            layout="fill"
+                            objectFit="cover"
                           />
                         </div>
                         <div className="flex-grow min-w-0">
@@ -363,30 +320,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                           </div>
                           <div className="text-sm text-gray-500">{vehicle.price}</div>
                         </div>
-                        <div className="flex items-center ml-2"> {/* Group buttons */}
-                          {/* Edit button */}
-                          {onEditListedCar && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="flex-shrink-0"
-                              onClick={(e) => { e.stopPropagation(); onEditListedCar(vehicle); }}
-                            >
-                              <Edit className="h-4 w-4 text-blue-500" />
-                            </Button>
-                          )}
-                          {/* Delete button */}
-                          {onDeleteListedCar && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="flex-shrink-0"
-                              onClick={(e) => { e.stopPropagation(); onDeleteListedCar(vehicle); }}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          )}
-                        </div>
+                        <Edit className="h-5 w-5 text-blue-500 flex-shrink-0" />
                       </Link>
                     ))
                   ) : (
@@ -397,7 +331,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     </div>
                   )}
                 </div>
-
                 <div className="p-4 border-t">
                   <Button variant="outline" className="w-full" onClick={onViewUploadVehicle}>
                     <Plus className="mr-2 h-4 w-4" />

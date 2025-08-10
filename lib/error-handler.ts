@@ -1,5 +1,51 @@
 import { toast } from "@/hooks/use-toast"
 
+export function handleSupabaseError(error: any): string {
+  if (!error) return "An unknown error occurred"
+
+  // Auth errors
+  if (error.message?.includes("Invalid login credentials")) {
+    return "Invalid email or password"
+  }
+  if (error.message?.includes("Email not confirmed")) {
+    return "Please check your email and click the confirmation link"
+  }
+  if (error.message?.includes("User already registered")) {
+    return "An account with this email already exists"
+  }
+  if (error.message?.includes("Password should be at least")) {
+    return "Password must be at least 6 characters long"
+  }
+  if (error.message?.includes("JWT") || error.message?.includes("does not exist")) {
+    return "Session expired. Please sign in again."
+  }
+  if (error.message?.includes("Database error saving new user")) {
+    return "Account created but profile setup failed. Please try signing in."
+  }
+
+  // Database errors
+  if (error.code === "PGRST116") {
+    return "Record not found"
+  }
+  if (error.code === "23505") {
+    return "This record already exists"
+  }
+
+  // Storage errors
+  if (error.message?.includes("The resource was not found") || error.message?.includes("Bucket not found")) {
+    return "File not found or bucket misconfigured."
+  }
+  if (error.message?.includes("The object exceeded the maximum allowed size")) {
+    return "File is too large"
+  }
+  if (error.message?.includes("violates row-level security policy")) {
+    return "Permission denied. You may need to re-authenticate to perform this action."
+  }
+
+  // Return original message
+  return error.message || "An unexpected error occurred"
+}
+
 export class AppError extends Error {
   constructor(
     message: string,

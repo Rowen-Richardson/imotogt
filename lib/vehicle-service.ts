@@ -401,4 +401,20 @@ export const vehicleService = {
     }
     return true
   },
+
+  async updateVehicleStatus(vehicleId: string, status: "active" | "sold" | "inactive"): Promise<Vehicle | null> {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("vehicles")
+      .update({ status })
+      .eq("id", vehicleId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error(`Error updating vehicle status for ${vehicleId}:`, error)
+      throw new VehicleError("Failed to update vehicle status", "DB_ERROR")
+    }
+    return data as Vehicle | null
+  },
 }
