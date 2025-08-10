@@ -2,55 +2,48 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image" // Added for user profile picture
-import Link from "next/link"
 import { Plus, Edit, Eye, Heart, MessageSquare, Car, Package } from "lucide-react"
 import { Trash2 } from "lucide-react" // Import the Trash2 icon
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Header } from "./ui/header"
-import LikedCars from "@/components/liked-cars"
+import LikedCarsPage from "@/components/liked-cars-page"
 import type { Vehicle } from "@/types/vehicle"
-import type { UserProfile } from "@/types/user"
+import type { UserProfile } from "@/types/user"; // Import UserProfile from shared types
 
 interface DashboardProps {
-  user: UserProfile
+  user: UserProfile; // Use the imported UserProfile type
   onSignOut: () => void
   onBack: () => void
-  savedCars?: Vehicle[]
-  onViewProfileSettings: () => void
-  onViewUploadVehicle: () => void
-  onUserUpdate: (updatedData: Partial<UserProfile>) => void
-  onEditListedCar?: (vehicle: Vehicle) => void
-  onDeleteListedCar?: (vehicle: Vehicle) => void
-  listedCars?: Vehicle[]
-  onSaveCar?: (vehicle: Vehicle) => void
-  onLoginClick: () => void
-  onGoHome: () => void
-  onShowAllCars: () => void
-  onGoToSellPage: () => void
-  onNavigateToUpload: () => void
-  onViewDetails: (vehicle: Vehicle) => void
+  savedCars?: Vehicle[] // Add saved cars prop
+  onViewProfileSettings: () => void // Add callback for viewing profile settings
+  onViewUploadVehicle: () => void; // Add callback for viewing vehicle upload page
+  onUserUpdate: (updatedData: Partial<UserProfile>) => void; // Add onUserUpdate prop
+  onEditListedCar?: (vehicle: Vehicle) => void; // Add callback for editing a listed car // Keep this line
+  onDeleteListedCar?: (vehicle: Vehicle) => void; // Add callback for deleting a listed car
+  listedCars?: Vehicle[]; // Add listed cars prop for the recently listed section
+  onSaveCar?: (vehicle: Vehicle) => void; // Add callback for saving/unsaving cars
+  // Add Header navigation props (onSignOut was already present)
+  onLoginClick: () => void;
+  onGoHome: () => void;
+  onShowAllCars: () => void;
+  onGoToSellPage: () => void;
+  onNavigateToUpload: () => void;
 }
 
-export default function Dashboard({
-  user,
-  onSignOut,
-  onBack,
-  savedCars = [],
-  listedCars = [],
-  onViewProfileSettings,
-  onViewUploadVehicle,
-  onSaveCar,
-  onEditListedCar,
-  onDeleteListedCar,
-  onLoginClick,
-  onGoHome,
-  onShowAllCars,
-  onGoToSellPage,
-  onViewDetails,
-}: DashboardProps) {
+export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewProfileSettings, onViewUploadVehicle, onSaveCar, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
   // --- State and hooks ---
-  const router = useRouter()
+  const router = useRouter();
+  const [currentCarIndex, setCurrentCarIndex] = useState(0);
+
+  // Auto-rotate carousel
+  useEffect(() => {
+    if (savedCars.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentCarIndex((current) => (current + 1) % savedCars.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [savedCars.length]);
 
   // Debug: Log user prop to verify updates
   console.log('[Dashboard] user:', user);
@@ -248,13 +241,93 @@ export default function Dashboard({
                   </div>
                 </Card>
 
-                <div className="col-span-6">
-                  <LikedCars
-                    likedVehicles={savedCars}
-                    onViewAll={() => router.push("/liked-cars-page")}
-                    onViewDetails={onViewDetails}
+                {/* Featured Car Card - Replaces Calendar */}
+                <Card className="col-span-6 rounded-3xl overflow-hidden w-full h-full relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
+                  <img
+                    src={
+                      savedCars.length > 0
+                        ? savedCars[currentCarIndex]?.image || "/placeholder.svg?height=400&width=600"
+                        : "/placeholder.svg?height=400&width=600&text=No+Saved+Cars"
+                    }
+                    alt={
+                      savedCars.length > 0
+                        ? `${savedCars[currentCarIndex]?.make} ${savedCars[currentCarIndex]?.model}`
+                        : "No saved cars"
+                    }
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
-                </div>
+                  <div className="relative z-20 h-full flex flex-col justify-between p-6">
+                    <div className="flex justify-between">
+                      <span
+                        onClick={() => router.push('/liked-cars-page')}
+                        className="bg-[#FF6700] text-white px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-[#FF7D33] transition-colors"
+                      >
+                        View Saved Cars
+                      </span>
+                      {savedCars.length > 0 && (
+                        <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                          {savedCars.length} saved cars
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-end">
+                      {savedCars.length > 0 ? (
+                        <>
+                          <a href={`/vehicle/${savedCars[currentCarIndex]?.id}`} className="text-white">
+                            <h3 className="text-2xl font-bold mb-1">
+                              {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
+                              {savedCars[currentCarIndex]?.model}
+                            </h3>
+                            <p className="text-white/80 mb-2">
+                              {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
+                            </p>
+                            <p className="text-xl font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
+                          </a>
+                          <Button
+                            className="bg-white text-[#3E5641] hover:bg-white/90"
+                            onClick={() => {
+                              // Open contact form or modal
+                              if (savedCars[currentCarIndex]) {
+                                window.open(
+                                  `mailto:${savedCars[currentCarIndex].sellerEmail}?subject=Inquiry about your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model}&body=Hello ${savedCars[currentCarIndex].sellerName},%0D%0A%0D%0AI am interested in your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model} listed for ${savedCars[currentCarIndex].price}.%0D%0A%0D%0APlease contact me with more information.%0D%0A%0D%0AThank you.`,
+                                )
+                              }
+                            }}
+                          >
+                            Contact Seller
+                          </Button>
+                        </>
+                      ) : (
+                        <div className="text-white text-center w-full">
+                          <Car className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                          <h3 className="text-xl font-bold mb-1">No Saved Cars</h3>
+                          <p className="text-white/80 mb-4">Save cars you're interested in to see them here</p>
+                          <Button className="bg-white text-[#3E5641] hover:bg-white/90" onClick={onShowAllCars}>
+                            Browse Cars
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Carousel indicators */}
+                    {savedCars.length > 1 && (
+                      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                        {savedCars.map((_, index) => (
+                          <button
+                            key={index}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              currentCarIndex === index ? "bg-white w-4" : "bg-white/40"
+                            }`}
+                            onClick={() => setCurrentCarIndex(index)}
+                            aria-label={`Go to slide ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
               </div>
             </div>
 
@@ -271,7 +344,7 @@ export default function Dashboard({
                 <div className="flex-grow overflow-auto p-3">
                   {listedCars.length > 0 ? (
                     listedCars.map((vehicle) => (
-                      <Link
+                      <a
                         key={vehicle.id}
                         href={`/vehicle/${vehicle.id}`}
                         className="flex items-center gap-3 p-3 mb-2 rounded-xl hover:bg-gray-50 transition-colors"
@@ -313,7 +386,7 @@ export default function Dashboard({
                             </Button>
                           )}
                         </div>
-                      </Link>
+                      </a>
                     ))
                   ) : (
                     <div className="text-center text-gray-500 py-8">
