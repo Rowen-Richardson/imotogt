@@ -124,7 +124,7 @@ export default function ResultsPage() {
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}
-                    isSaved={savedVehicles.has(vehicle.id)}
+                    isSaved={savedVehicles.some((v) => v.id === vehicle.id)}
                     onToggleSave={() => toggleSaveVehicle(vehicle)}
                     isLoggedIn={!!user}
                   />

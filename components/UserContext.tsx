@@ -13,7 +13,7 @@ interface UserContextType {
   userProfile: UserProfile | null
   loading: boolean
   listedVehicles: Vehicle[]
-  savedVehicles: Set<string>
+  savedVehicles: Vehicle[]
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, userData?: Partial<UserProfile>) => Promise<void>
   signOut: () => Promise<void>
@@ -30,7 +30,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [listedVehicles, setListedVehicles] = useState<Vehicle[]>([])
-  const [savedVehicles, setSavedVehicles] = useState<Set<string>>(new Set())
+  const [savedVehicles, setSavedVehicles] = useState<Vehicle[]>([])
   const router = useRouter()
 
   const fetchUserData = useCallback(async (currentUser: User) => {
@@ -42,13 +42,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ])
       setUserProfile(profile)
       setListedVehicles(userListed)
-      setSavedVehicles(new Set(userSaved.map((v) => v.id))) // Convert to Set of IDs
+      setSavedVehicles(userSaved) // Directly store the array of saved vehicles
     } catch (error) {
       console.error("UserContext: Error fetching user data:", error)
       // On error, clear out potentially stale data
       setUserProfile(null)
       setListedVehicles([])
-      setSavedVehicles(new Set())
+      setSavedVehicles([])
     }
   }, [])
 
@@ -56,7 +56,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUser(null)
     setUserProfile(null)
     setListedVehicles([])
-    setSavedVehicles(new Set())
+    setSavedVehicles([])
   }
 
   const refreshUser = useCallback(async () => {
@@ -162,16 +162,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
       router.push("/login")
       return
     }
-    const isSaved = savedVehicles.has(vehicle.id) // Use .has() for Set
+    const isSaved = savedVehicles.some((v) => v.id === vehicle.id)
     if (isSaved) {
-      setSavedVehicles((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(vehicle.id)
-        return newSet
-      })
+      setSavedVehicles((prev) => prev.filter((v) => v.id !== vehicle.id))
       await vehicleService.unsaveVehicle(user.id, vehicle.id)
     } else {
-      setSavedVehicles((prev) => new Set(prev).add(vehicle.id)) // Add to Set
+      setSavedVehicles((prev) => [...prev, vehicle])
       await vehicleService.saveVehicle(user.id, vehicle.id)
     }
   }
