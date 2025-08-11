@@ -1,7 +1,7 @@
-"use client"
+"use client" // test user
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image" // Added for user profile picture
+import Image from "next/image" // Added for user profile picture test 
 import Link from "next/link"
 import { Plus, Edit, Eye, Heart, MessageSquare, Car, Package } from "lucide-react"
 import { Trash2 } from "lucide-react" // Import the Trash2 icon
@@ -67,9 +67,9 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
   const maxFreeListings = 5; // Assuming 5 is the limit for the free plan
   const freeListingsRemaining = Math.max(0, maxFreeListings - totalListings);
   const userMetrics = {
-    listingViews: 243, // Placeholder
-    saves: 18, // Placeholder
-    contacts: 7, // Placeholder
+    listingViews: "Coming Soon", // Placeholder
+    saves: "Coming soon", // Placeholder
+    contacts: "Coming Soon", // Placeholder
   };
 
   // --- Top-level conditional returns ---
@@ -102,7 +102,7 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
       {/* Main Content Area: Fills remaining space */}
       <main className="flex-1 px-6 pb-6 overflow-auto pt-20">
         <h1 className="text-4xl font-bold mb-6">
-          Welcome, {user.firstName}
+          Hi, {user.firstName}
         </h1>
 
         {/* Center container for the entire grid */}
