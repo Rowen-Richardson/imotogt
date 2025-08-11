@@ -82,7 +82,7 @@ export const authService = {
   /**
    * Sign in with OAuth provider
    */
-  async signInWithOAuth(provider: "google" | "facebook" | "apple") {
+  async signInWithOAuth(provider: "google") {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,

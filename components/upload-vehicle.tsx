@@ -453,21 +453,11 @@ export default function UploadVehicle({
     }
 
     try {
+      // The vehicleData should only contain form data and images.
+      // Seller information is automatically fetched on the server-side using the user's session.
       const vehicleData = { ...formData, images: vehicleImages }
-      // Include seller details when submitting the vehicle data
-      const vehicleDataWithSeller = {
-        ...vehicleData,
-        sellerName: formData.sellerName,
-        sellerEmail: formData.sellerEmail,
-        sellerPhone: formData.sellerPhone,
-        sellerSuburb: formData.sellerSuburb,
-        sellerCity: formData.sellerCity,
-        sellerProvince: formData.sellerProvince,
-        sellerProfilePic: formData.sellerProfilePic,
 
-      };
-
-      await onVehicleSubmit(vehicleDataWithSeller)
+      await onVehicleSubmit(vehicleData)
       setSubmitSuccess("Vehicle listed successfully! Redirecting to your dashboard...")
       setTimeout(() => {
         router.push("/dashboard")
@@ -488,7 +478,7 @@ export default function UploadVehicle({
     )
   }
 
-  if (!authUser?.email_confirmed_at) {
+  if (!authUser || !authUser.email_confirmed_at) {
     return (
       <div className="min-h-screen bg-[var(--light-bg)] dark:bg-[var(--dark-bg)] flex flex-col">
         <Header
@@ -506,7 +496,7 @@ export default function UploadVehicle({
           <h1 className="text-2xl font-bold mb-2 text-[#3E5641] dark:text-white">Account Not Verified</h1>
           <p className="max-w-md mb-6 text-gray-600 dark:text-gray-300">
             You must verify your email address before you can list a vehicle for sale. Please check your inbox for a
-            verification link sent to <strong>{authUser.email}</strong>.
+            verification link sent to <strong>{authUser?.email}</strong>.
           </p>
           <Button
             onClick={onBack}
