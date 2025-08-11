@@ -8,17 +8,17 @@ import { Trash2 } from "lucide-react" // Import the Trash2 icon
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Header } from "./ui/header"
-import LikedCarsPage from "@/components/liked-cars-page"
-import VehicleDetails from "./vehicle-details"
-import { vehicles } from "@/lib/data"
-import type { Vehicle } from "@/lib/data"
-import type { UserProfile } from "@/types/user"; // Import UserProfile from shared types
+import LikedCarsPage from "@/components/liked-cars-page";
+import VehicleDetails from "./vehicle-details";
+import { vehicles } from "@/lib/data";
+import type { Vehicle } from "@/types/vehicle";
+import type { UserProfile } from "@/types/user";
+import { useLikedCars } from "@/context/LikedCarsContext";
 
 interface DashboardProps {
   user: UserProfile; // Use the imported UserProfile type
   onSignOut: () => void
   onBack: () => void
-  savedCars?: Vehicle[] // Add saved cars prop
   onViewDetails?: (vehicle: Vehicle) => void // Add callback for viewing details
   onViewProfileSettings: () => void // Add callback for viewing profile settings
   onViewUploadVehicle: () => void; // Add callback for viewing vehicle upload page
@@ -26,7 +26,6 @@ interface DashboardProps {
   onEditListedCar?: (vehicle: Vehicle) => void; // Add callback for editing a listed car // Keep this line
   onDeleteListedCar?: (vehicle: Vehicle) => void; // Add callback for deleting a listed car
   listedCars?: Vehicle[]; // Add listed cars prop for the recently listed section
-  onSaveCar?: (vehicle: Vehicle) => void; // Add callback for saving/unsaving cars
   // Add Header navigation props (onSignOut was already present)
   onLoginClick: () => void;
   onGoHome: () => void;
@@ -35,20 +34,21 @@ interface DashboardProps {
   onNavigateToUpload: () => void;
 }
 
-export default function Dashboard({ user, onSignOut, onBack, savedCars = [], listedCars = [], onViewDetails, onViewProfileSettings, onViewUploadVehicle, onSaveCar, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
+export default function Dashboard({ user, onSignOut, onBack, listedCars = [], onViewDetails, onViewProfileSettings, onViewUploadVehicle, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
   // --- State and hooks ---
   const router = useRouter();
+  const { likedCars } = useLikedCars();
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
 
   // Auto-rotate carousel
   useEffect(() => {
-    if (savedCars.length <= 1) return;
+    if (likedCars.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentCarIndex((current) => (current + 1) % savedCars.length);
+      setCurrentCarIndex((current) => (current + 1) % likedCars.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [savedCars.length]);
+  }, [likedCars.length]);
 
   // Handle viewing vehicle details
   const handleViewDetails = (vehicle: Vehicle) => {
@@ -82,8 +82,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
         vehicle={selectedVehicle}
         onBack={() => setSelectedVehicle(null)}
         user={user}
-        savedCars={savedCars}
-        onSaveCar={onSaveCar}
       />
     );
   }
@@ -271,13 +269,15 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                   <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
                   <img
                     src={
-                      savedCars.length > 0
-                        ? savedCars[currentCarIndex]?.image || "/placeholder.svg?height=400&width=600"
+                      likedCars.length > 0
+                        ? (likedCars[currentCarIndex]?.images && likedCars[currentCarIndex].images.length > 0
+                          ? likedCars[currentCarIndex].images[0]
+                          : likedCars[currentCarIndex]?.image) || "/placeholder.svg?height=400&width=600"
                         : "/placeholder.svg?height=400&width=600&text=No+Saved+Cars"
                     }
                     alt={
-                      savedCars.length > 0
-                        ? `${savedCars[currentCarIndex]?.make} ${savedCars[currentCarIndex]?.model}`
+                      likedCars.length > 0
+                        ? `${likedCars[currentCarIndex]?.make} ${likedCars[currentCarIndex]?.model}`
                         : "No saved cars"
                     }
                     className="absolute inset-0 w-full h-full object-cover"
@@ -290,36 +290,36 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                       >
                         View Saved Cars
                       </span>
-                      {savedCars.length > 0 && (
+                      {likedCars.length > 0 && (
                         <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
-                          {savedCars.length} saved cars
+                          {likedCars.length} saved cars
                         </span>
                       )}
                     </div>
 
                     <div className="flex justify-between items-end">
-                      {savedCars.length > 0 ? (
+                      {likedCars.length > 0 ? (
                         <>
                           <div
                             className="text-white cursor-pointer"
-                            onClick={() => handleViewDetails(savedCars[currentCarIndex])}
+                            onClick={() => handleViewDetails(likedCars[currentCarIndex])}
                           >
                             <h3 className="text-2xl font-bold mb-1">
-                              {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
-                              {savedCars[currentCarIndex]?.model}
+                              {likedCars[currentCarIndex]?.year} {likedCars[currentCarIndex]?.make}{" "}
+                              {likedCars[currentCarIndex]?.model}
                             </h3>
                             <p className="text-white/80 mb-2">
-                              {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
+                              {likedCars[currentCarIndex]?.variant} • {likedCars[currentCarIndex]?.mileage} km
                             </p>
-                            <p className="text-xl font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
+                            <p className="text-xl font-bold text-[#FF6700]">{likedCars[currentCarIndex]?.price}</p>
                           </div>
                           <Button
                             className="bg-white text-[#3E5641] hover:bg-white/90"
                             onClick={() => {
                               // Open contact form or modal
-                              if (savedCars[currentCarIndex]) {
+                              if (likedCars[currentCarIndex]) {
                                 window.open(
-                                  `mailto:${savedCars[currentCarIndex].sellerEmail}?subject=Inquiry about your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model}&body=Hello ${savedCars[currentCarIndex].sellerName},%0D%0A%0D%0AI am interested in your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model} listed for ${savedCars[currentCarIndex].price}.%0D%0A%0D%0APlease contact me with more information.%0D%0A%0D%0AThank you.`,
+                                  `mailto:${likedCars[currentCarIndex].sellerEmail}?subject=Inquiry about your ${likedCars[currentCarIndex].year} ${likedCars[currentCarIndex].make} ${likedCars[currentCarIndex].model}&body=Hello ${likedCars[currentCarIndex].sellerName},%0D%0A%0D%0AI am interested in your ${likedCars[currentCarIndex].year} ${likedCars[currentCarIndex].make} ${likedCars[currentCarIndex].model} listed for ${likedCars[currentCarIndex].price}.%0D%0A%0D%0APlease contact me with more information.%0D%0A%0D%0AThank you.`,
                                 )
                               }
                             }}
@@ -340,9 +340,9 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                     </div>
 
                     {/* Carousel indicators */}
-                    {savedCars.length > 1 && (
+                    {likedCars.length > 1 && (
                       <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-                        {savedCars.map((_, index) => (
+                        {likedCars.map((_, index) => (
                           <button
                             key={index}
                             className={`w-2 h-2 rounded-full transition-all ${

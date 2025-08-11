@@ -2,9 +2,10 @@
 
 import type React from "react"
 
-import type { Vehicle } from "@/lib/data"
-import { Heart } from "lucide-react"
-import { cn } from "@/lib/utils"
+import type { Vehicle } from "@/types/vehicle";
+import { Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useLikedCars } from "@/context/LikedCarsContext";
 
 // Helper function to format raw price string to "R X XXX.XX" for display
 const formatPriceForDisplay = (rawValue: string | number | undefined | null): string => {
@@ -39,18 +40,22 @@ const formatPriceForDisplay = (rawValue: string | number | undefined | null): st
 }
 
 interface VehicleCardProps {
-  vehicle: Vehicle
-  onViewDetails: () => void
-  isSaved: boolean
-  onToggleSave: () => void
-  isLoggedIn: boolean
+  vehicle: Vehicle;
+  onViewDetails: () => void;
 }
 
-export function VehicleCard({ vehicle, onViewDetails, isSaved, onToggleSave, isLoggedIn }: VehicleCardProps) {
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent triggering onViewDetails when clicking the heart
-    onToggleSave()
-  }
+export function VehicleCard({ vehicle, onViewDetails }: VehicleCardProps) {
+  const { likedCars, addLikedCar, removeLikedCar, isCarLiked } = useLikedCars();
+  const isLiked = isCarLiked(vehicle.id);
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isLiked) {
+      removeLikedCar(vehicle.id);
+    } else {
+      addLikedCar(vehicle);
+    }
+  };
 
   return (
     <div
@@ -63,15 +68,13 @@ export function VehicleCard({ vehicle, onViewDetails, isSaved, onToggleSave, isL
           alt={`${vehicle.make} ${vehicle.model} ${vehicle.variant || ""}`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        {isLoggedIn && (
-          <button
-            onClick={handleSaveClick}
-            className="absolute top-3 right-3 bg-black/40 p-2 rounded-full text-white hover:bg-black/60 transition-colors"
-            aria-label={isSaved ? "Unsave vehicle" : "Save vehicle"}
-          >
-            <Heart className={cn("w-5 h-5", isSaved ? "fill-red-500 text-red-500" : "fill-transparent")} />
-          </button>
-        )}
+        <button
+          onClick={handleLikeClick}
+          className="absolute top-3 right-3 bg-black/40 p-2 rounded-full text-white hover:bg-black/60 transition-colors"
+          aria-label={isLiked ? "Unlike vehicle" : "Like vehicle"}
+        >
+          <Heart className={cn("w-5 h-5", isLiked ? "fill-red-500 text-red-500" : "fill-transparent")} />
+        </button>
       </div>
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="text-lg font-semibold mb-2 text-[#3E5641] dark:text-white">

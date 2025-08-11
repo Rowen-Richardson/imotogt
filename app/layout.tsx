@@ -3,8 +3,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { UserProvider } from "@/components/UserContext"
-import { Toaster } from "@/components/ui/toaster"
+import { UserProvider } from "@/components/UserContext";
+import { Toaster } from "@/components/ui/toaster";
+import { LikedCarsProvider } from "@/context/LikedCarsContext";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,8 +25,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <UserProvider>
-            {children}
-            <Toaster />
+            <LikedCarsProvider>
+              {children}
+              <Toaster />
+            </LikedCarsProvider>
           </UserProvider>
         </ThemeProvider>
       </body>

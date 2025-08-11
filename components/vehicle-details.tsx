@@ -22,14 +22,13 @@ import {
   MapPin, // For location display
 } from "lucide-react"
 import type { Vehicle } from "@/types/vehicle"
-import type { UserProfile } from "@/types/user"; // Added import
+import type { UserProfile } from "@/types/user";
+import { useLikedCars } from "@/context/LikedCarsContext";
 
 interface VehicleDetailsProps {
   vehicle: Vehicle // Assumes Vehicle type now has vehicle.images?: string[]
   onBack: () => void
   user?: UserProfile // Changed 'any' to 'UserProfile'
-  onSaveCar?: (vehicle: Vehicle) => void // Add callback for saving cars
-  savedCars?: Vehicle[] // Add array of saved cars to check if this car is saved
   isEditMode?: boolean; // To enable editing UI
   onUpdateVehicle?: (updatedVehicle: Vehicle) => void; // Callback to save changes
 }
@@ -38,8 +37,6 @@ export default function VehicleDetails({
   vehicle,
   onBack,
   user,
-  onSaveCar,
-  savedCars = [],
   isEditMode = false,
   onUpdateVehicle
 }: VehicleDetailsProps) {
@@ -69,7 +66,6 @@ export default function VehicleDetails({
   const [message, setMessage] = useState("")
   const [isMobile, setIsMobile] = useState(false)
   const [activeTab, setActiveTab] = useState("details")
-  const [isSaved, setIsSaved] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [isZoomed, setIsZoomed] = useState(false)
@@ -140,10 +136,6 @@ export default function VehicleDetails({
   }, [vehicle, isEditMode]);
 
   // Check if this vehicle is in the saved cars list
-  useEffect(() => {
-    // Correctly set isSaved based on whether the vehicle is in the savedCars prop
-    setIsSaved(savedCars.some((car) => car.id === vehicle.id));
-  }, [savedCars, vehicle.id])
 
   useEffect(() => {
     setIsZoomed(false)
@@ -216,17 +208,16 @@ export default function VehicleDetails({
     setMessage("")
   }
 
-  const handleSaveClick = () => {
-    if (!user) {
-      alert("Please log in to save vehicles")
-      return
-    }
+  const { addLikedCar, removeLikedCar, isCarLiked } = useLikedCars();
+  const isLiked = isCarLiked(vehicle.id);
 
-    setIsSaved(!isSaved)
-    if (onSaveCar) {
-      onSaveCar(vehicle)
+  const handleLikeClick = () => {
+    if (isLiked) {
+      removeLikedCar(vehicle.id);
+    } else {
+      addLikedCar(vehicle);
     }
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -641,13 +632,13 @@ export default function VehicleDetails({
               Sponsored
             </div>
             <button
-              onClick={handleSaveClick}
+              onClick={handleLikeClick}
               className="text-[#3E5641] dark:text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1 hover:bg-[#FFF8E0] dark:hover:bg-[#2A352A] cursor-pointer"
             >
               <Heart
-                className={`w-4 h-4 ${isSaved ? "text-purple-600 fill-purple-600" : "text-[#FF6700] dark:text-[#FF7D33]"}`}
+                className={`w-4 h-4 ${isLiked ? "text-purple-600 fill-purple-600" : "text-[#FF6700] dark:text-[#FF7D33]"}`}
               />
-              <span>{isSaved ? "Saved" : "Save"}</span>
+              <span>{isLiked ? "Saved" : "Save"}</span>
             </button>
             </>
             )}

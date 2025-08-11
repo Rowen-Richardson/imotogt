@@ -45,7 +45,7 @@ const MAKE_ABBREVIATIONS: Record<string, string> = {
 
 export default function CarMarketplace() {
   const router = useRouter()
-  const { user, setUser } = useUser()
+  const { user, signOut: handleSignOut } = useUser()
   const [search, setSearch] = useState("")
   const [showMoreOptions, setShowMoreOptions] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
@@ -53,7 +53,6 @@ export default function CarMarketplace() {
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([])
   const [isSearchPage, setIsSearchPage] = useState(true)
-  const [savedCars, setSavedCars] = useState<Vehicle[]>([])
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedTerms, setSelectedTerms] = useState<string[]>([])
@@ -261,22 +260,6 @@ export default function CarMarketplace() {
     { name: "Convertible", icon: CarIcon },
   ]
 
-  const handleSaveCar = (vehicle: Vehicle) => {
-    setSavedCars((prevSavedCars) => {
-      const alreadySaved = prevSavedCars.some((car) => car.id === vehicle.id)
-      if (alreadySaved) {
-        return prevSavedCars.filter((car) => car.id !== vehicle.id)
-      } else {
-        return [...prevSavedCars, vehicle]
-      }
-    })
-  }
-
-  const handleSignOut = () => {
-    setUser(null)
-    router.push("/home")
-  }
-
   // Navigation handlers using Next.js routing
   const navigationHandlers = {
     onLoginClick: () => router.push("/login"),
@@ -323,8 +306,6 @@ export default function CarMarketplace() {
             vehicle={selectedVehicle}
             onBack={() => setSelectedVehicle(null)}
             user={user}
-            savedCars={savedCars}
-            onSaveCar={handleSaveCar}
           />
         </div>
       </>
@@ -734,9 +715,6 @@ export default function CarMarketplace() {
                     key={vehicle.id}
                     vehicle={vehicle}
                     onViewDetails={() => setSelectedVehicle(vehicle)}
-                    isSaved={savedCars.some((saved) => saved.id === vehicle.id)}
-                    onToggleSave={() => handleSaveCar(vehicle)}
-                    isLoggedIn={!!user}
                   />
                 ))}
               </div>
