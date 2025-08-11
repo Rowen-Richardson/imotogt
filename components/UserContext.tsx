@@ -14,6 +14,7 @@ interface UserContextType {
   loading: boolean
   listedVehicles: Vehicle[]
   savedVehicles: Set<string>
+  isVehicleSaved: (vehicleId: string) => boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, userData?: Partial<UserProfile>) => Promise<void>
   signOut: () => Promise<void>
@@ -182,12 +183,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     await vehicleService.deleteVehicle(vehicleId)
   }
 
+  const isVehicleSaved = (vehicleId: string) => {
+    return savedVehicles.has(vehicleId)
+  }
+
   const value: UserContextType = {
     user,
     userProfile,
     loading,
     listedVehicles,
     savedVehicles,
+    isVehicleSaved,
     signIn,
     signUp,
     signOut,

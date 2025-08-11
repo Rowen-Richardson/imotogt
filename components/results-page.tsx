@@ -14,7 +14,7 @@ import { Search } from "lucide-react"
 export default function ResultsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, signOut, savedVehicles, toggleSaveVehicle } = useUser()
+  const { user, signOut, isVehicleSaved, toggleSaveVehicle } = useUser()
 
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
@@ -96,7 +96,7 @@ export default function ResultsPage() {
             vehicle={selectedVehicle}
             onBack={() => setSelectedVehicle(null)}
             user={user}
-            isSaved={savedVehicles.has(selectedVehicle.id)}
+            isSaved={isVehicleSaved(selectedVehicle.id)}
             onToggleSave={() => toggleSaveVehicle(selectedVehicle)}
           />
         </div>
@@ -143,7 +143,7 @@ export default function ResultsPage() {
                     key={vehicle.id}
                     vehicle={vehicle}
                     onViewDetails={() => setSelectedVehicle(vehicle)}
-                    isSaved={savedVehicles.has(vehicle.id)}
+                    isSaved={isVehicleSaved(vehicle.id)}
                     onToggleSave={() => toggleSaveVehicle(vehicle)}
                     isLoggedIn={!!user}
                   />

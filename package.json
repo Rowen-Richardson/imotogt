@@ -41,6 +41,7 @@
     "@supabase/auth-helpers-nextjs": "latest",
     "@supabase/supabase-js": "latest",
     "@types/debug": "latest",
+    "@vitejs/plugin-react": "^5.0.0",
     "@vitest/browser": "latest",
     "@vitest/ui": "latest",
     "autoprefixer": "^10.4.20",
