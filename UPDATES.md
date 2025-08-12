@@ -54,6 +54,20 @@ This document tracks all updates made to the car marketplace website. It serves 
 
 ---
 
+## Feature Implementations
+
+### User Vehicle Listing and Management
+- **Description:** Implemented functionality for users to list, view, edit, and delete their vehicles from the dashboard, and change vehicle status.
+- **Components Affected:** `app/upload-vehicle/page.tsx`, `lib/vehicle-service.ts`, `app/dashboard/page.tsx`, `components/upload-vehicle.tsx`, `components/dashboard.tsx`, `components/my-listing-card.tsx`.
+- **Details:**
+  - Resolved database insert errors in `createVehicle` by removing non-existent seller-specific columns (`seller_name`, `seller_email`, `seller_phone`, `seller_suburb`, `seller_city`, `seller_province`, `seller_profile_pic`).
+  - Implemented fetching and displaying listed vehicles for the current user on the dashboard using `vehicleService.getVehiclesByUserId`.
+  - Added delete functionality using `vehicleService.deleteVehicle` and integrated it into the dashboard view.
+  - Added functionality to change vehicle status ('active'/'sold') using `vehicleService.updateVehicleStatus` and integrated it into the dashboard view.
+  - Modified `UploadVehicleComponent` to accept initial vehicle data for pre-filling forms and displaying existing images during editing.
+  - Ensured the `images` column is fetched for listed vehicles to allow displaying the main image on the dashboard vehicle cards.
+
+
 ## Bug Fixes
 
 ### 1. `VehicleCard` Module Not Found
