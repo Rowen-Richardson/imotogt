@@ -116,9 +116,6 @@ export default function UploadVehicle({
     variant: "",
     description: "",
     condition: "good",
-    location: "",
-    exteriorColor: "",
-    interiorColor: "",
     sellerName: profile.firstName && profile.lastName ? `${profile.firstName} ${profile.lastName}` : profile.firstName || profile.lastName || profile.email.split("@")[0],
     sellerEmail: profile.email,
     sellerPhone: profile.phone || "",
@@ -440,10 +437,7 @@ export default function UploadVehicle({
       !formData.transmission ||
       !formData.fuel ||
       !formData.engineCapacity ||
-      !formData.condition ||
-      !formData.location ||
-      !formData.exteriorColor ||
-      !formData.interiorColor
+      !formData.condition
     ) {
       setSubmitError("Please fill in all required fields.")
       setIsSubmitting(false)
