@@ -7,7 +7,6 @@ export interface Vehicle {
   year: number
   price: number
   mileage: number
-  condition: "excellent" | "good" | "fair" | "poor"
   fuel: string
   engineCapacity: string
   transmission: string
