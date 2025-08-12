@@ -7,15 +7,17 @@ export interface Vehicle {
   year: number
   price: number
   mileage: number
+  condition: "excellent" | "good" | "fair" | "poor"
   fuel: string
   engineCapacity: string
+  transmission: string
   bodyType: string
+  exteriorColor: string
+  interiorColor: string
   description?: string
   images: string[]
-  image?: string // For main image display
-  city?: string
-  province?: string
-  transmission: string
+  image?: string
+  location: string
   sellerName: string
   sellerEmail: string
   sellerPhone: string

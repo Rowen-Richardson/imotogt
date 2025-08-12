@@ -229,8 +229,10 @@ export const vehicleService = {
         engine_capacity: vehicleData.engineCapacity,
         body_type: vehicleData.bodyType,
         description: vehicleData.description,
-        city: vehicleData.city,
-        province: vehicleData.province,
+        condition: vehicleData.condition,
+        location: vehicleData.location,
+        exterior_color: vehicleData.exteriorColor,
+        interior_color: vehicleData.interiorColor,
         // Automatically populate seller info from the user's profile
         seller_name: `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim(),
         seller_email: userProfile.email,
