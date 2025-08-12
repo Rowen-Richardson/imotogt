@@ -9,7 +9,7 @@ import type { UserProfile } from "@/types/user"
 
 export default function UploadVehiclePage() {
   const router = useRouter()
-  const { user, loading } = useUser()
+  const { user, userProfile, loading } = useUser()
 
   useEffect(() => {
     if (!loading && !user) {
@@ -18,7 +18,7 @@ export default function UploadVehiclePage() {
   }, [user, loading, router])
 
   const handleVehicleSubmit = async (vehicleData: any) => {
-    if (!user) throw new Error("User is not authenticated.")
+    if (!user || !userProfile) throw new Error("User is not authenticated.")
 
     try {
       // Map form data to the specific structure required by the vehicle service
@@ -35,9 +35,14 @@ export default function UploadVehiclePage() {
         engineCapacity: vehicleData.engineCapacity,
         bodyType: vehicleData.bodyType,
         description: vehicleData.description,
-        city: vehicleData.sellerCity, // Map from form to db schema
-        province: vehicleData.sellerProvince, // Map from form to db schema
+        city: vehicleData.sellerCity,
+        province: vehicleData.sellerProvince,
         images: vehicleData.images,
+        // Add missing seller fields
+        sellerName: vehicleData.sellerName,
+        sellerEmail: vehicleData.sellerEmail,
+        sellerPhone: vehicleData.sellerPhone,
+        status: "active",
       }
 
       await vehicleService.createVehicle(payload)
@@ -74,7 +79,7 @@ export default function UploadVehiclePage() {
     }
   }
 
-  if (loading || !user) {
+  if (loading || !user || !userProfile) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-[var(--light-bg)] dark:bg-[var(--dark-bg)]">
         <p className="text-[#3E5641] dark:text-white">Loading...</p>
@@ -84,10 +89,10 @@ export default function UploadVehiclePage() {
 
   return (
     <UploadVehicleComponent
-      user={user as UserProfile}
+      user={userProfile}
       onVehicleSubmit={handleVehicleSubmit}
       onBack={handleBack}
       onSaveProfile={handleSaveProfile}
     />
-  );
+  )
 }
