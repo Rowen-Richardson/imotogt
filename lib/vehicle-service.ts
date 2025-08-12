@@ -229,7 +229,6 @@ export const vehicleService = {
         engine_capacity: vehicleData.engineCapacity,
         body_type: vehicleData.bodyType,
         description: vehicleData.description,
-        condition: vehicleData.condition,
         location: `${userProfile.suburb || ""} ${userProfile.city || ""} ${userProfile.province || ""}`.trim(), // Derived location
         // Automatically populate seller info from the user's profile
         seller_name: `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim(),
