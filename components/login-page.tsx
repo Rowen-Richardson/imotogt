@@ -229,15 +229,7 @@ export default function LoginPage({
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                <Button variant="outline" onClick={() => handleOAuthSignIn("google")} disabled={isLoading}>
-                  <Image src="/google-icon.svg" alt="Google" width={20} height={20} />
-                </Button>
-                <Button variant="outline" onClick={() => handleOAuthSignIn("facebook")} disabled={isLoading}>
-                  <Image src="/facebook-icon.svg" alt="Facebook" width={20} height={20} />
-                </Button>
-                <Button variant="outline" onClick={() => handleOAuthSignIn("apple")} disabled={isLoading}>
-                  <Image src="/apple-icon.svg" alt="Apple" width={20} height={20} />
+              <div className="mt-6">
                 </Button>
               </div>
             </div>
