@@ -232,20 +232,13 @@ export const vehicleService = {
         city: vehicleData.city,
         province: vehicleData.province,
         // Automatically populate seller info from the user's profile
-        seller_name: `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim(),
-        seller_email: userProfile.email,
-        seller_phone: userProfile.phone,
-        seller_suburb: userProfile.suburb,
-        seller_city: userProfile.city,
-        seller_province: userProfile.province,
-        seller_profile_pic: userProfile.profile_pic,
         status: "active",
       })
       .select() // retrieves all columns of the newly created row
       .single()
 
     if (createError || !newVehicle) {
-      console.error("Error creating vehicle record:", createError);
+      console.error("Error creating vehicle record:", createError?.message || createError);
       throw new Error("Failed to create vehicle listing in database.");
     }
 
