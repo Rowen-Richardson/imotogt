@@ -82,13 +82,11 @@ export const authService = {
   /**
    * Sign in with OAuth provider
    */
-  async signInWithOAuth(provider: "google" | "facebook" | "apple") {
+  async signInWithOAuth(provider: "google" | "facebook" | "apple", options?: { redirectTo?: string }) {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+ options
       })
 
       if (error) throw new AuthError(handleSupabaseError(error), error.message)

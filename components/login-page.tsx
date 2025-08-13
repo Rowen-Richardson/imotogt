@@ -96,9 +96,7 @@ export default function LoginPage({
     setIsLoading(true)
     setError(null)
     try {
-      await authService.signInWithOAuth(provider, {
-        redirectTo: `${window.location.origin}/dashboard`
-      })
+      await authService.signInWithOAuth(provider)
       // The user will be redirected by Supabase, and the UserProvider will handle the session.
     } catch (e) {
       if (e instanceof AuthError) {
