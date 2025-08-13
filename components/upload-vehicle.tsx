@@ -263,8 +263,8 @@ export default function UploadVehicle({
     setSellerFormData(updated)
     // Auto-save to profile on every change
     try {
-      if (updateProfile) await updateProfile(updated)
-      if (onSaveProfile) await onSaveProfile(updated)
+      // if (updateProfile) await updateProfile(updated) // Commented out for testing auto-save issue
+      // if (onSaveProfile) await onSaveProfile(updated) // Commented out for testing auto-save issue
     } catch (error) {
       console.error("Failed to auto-save seller info:", error)
       setSubmitError("Failed to auto-save seller information. Please try again.")
