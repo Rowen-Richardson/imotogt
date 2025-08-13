@@ -208,6 +208,8 @@ export default function CarMarketplace() {
     if (fuelTypeSelect?.value && fuelTypeSelect.value !== "All") queryParams.set("fuelType", fuelTypeSelect.value)
     if (transmissionSelect?.value && transmissionSelect.value !== "All")
       queryParams.set("transmission", transmissionSelect.value)
+    queryParams.set("engineCapacityMin", engineCapacityRange[0].toFixed(1))
+    queryParams.set("engineCapacityMax", engineCapacityRange[1].toFixed(1))
 
     router.push(`/results?${queryParams.toString()}`)
   }
