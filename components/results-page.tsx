@@ -40,6 +40,7 @@ export default function ResultsPage() {
   })
 
   useEffect(() => {
+    console.log("useEffect in ResultsPage called. Fetching vehicles with filters:", filters);
     const fetchAndSetVehicles = async () => {
       setLoading(true)
       const data = await vehicleService.getVehicles(filters) // Pass filters here
@@ -47,6 +48,7 @@ export default function ResultsPage() {
         setAllVehicles(data)
       } else {
         console.error("Error fetching vehicles:")
+        console.log("Received data:", data);
       }
       setLoading(false)
     }

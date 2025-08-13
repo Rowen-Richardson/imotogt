@@ -90,7 +90,7 @@ export const vehicleService = {
     const { data, error } = await queryBuilder;
 
     if (error) { // Use error from the executed query
-      console.error("Error fetching vehicles:", error)
+      console.error("Supabase query error:", error);
       return []
     }
 

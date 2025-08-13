@@ -126,11 +126,9 @@ export function Header({
       <nav
         className={`
           mx-auto max-w-6xl w-[95%] rounded-full transition-all duration-300 ease-in-out
-          ${
-            transparent && !isScrolled && !isMenuOpen
-              ? "bg-black/20 backdrop-blur-sm"
-              : "bg-black/90 backdrop-blur-md shadow-lg"
-          }
+          ${ 
+            transparent && !isScrolled ? "bg-black/20 backdrop-blur-sm" : "bg-black/90 backdrop-blur-md shadow-lg"
+          } ${isMobile && isMenuOpen ? '!rounded-none w-full max-w-full' : ''}
         `}
       >
         <div className="flex items-center justify-between px-4 py-2 bg-black text-white rounded-full">
@@ -230,11 +228,11 @@ export function Header({
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`
-            md:hidden overflow-hidden transition-all duration-300 ease-in-out
-            ${isMenuOpen ? "max-h-[calc(100vh-60px)] opacity-100" : "max-h-0 opacity-0"}
-          `}
+        <div // Removed rounded-b-lg
+          className={` 
+            md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-black
+            ${isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"}
+          `} // Added bg-black and removed rounded-b-lg
         >
           <div className="px-6 py-4 space-y-4 border-t border-white/10">
             <button
@@ -258,31 +256,12 @@ export function Header({
 
             {currentUser ? (
               <div className="space-y-2 pt-4 border-t border-white/10">
-                <div className="flex items-center space-x-2 text-white py-2">
-                  <span className="font-medium">
-                    {userProfile?.firstName || currentUser.email?.split("@")[0] || "User"}
-                  </span>
-                </div>
                 <button
                   onClick={() => handleNavigation(onDashboardClick)}
                   className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
                 >
                   <Car className="w-4 h-4" />
                   <span>Dashboard</span>
-                </button>
-                <button
-                  onClick={() => handleNavigation(() => (window.location.href = "/settings"))}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
-                </button>
-                <button
-                  onClick={() => handleNavigation(() => (window.location.href = "/liked-cars"))}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Heart className="w-4 h-4" />
-                  <span>Liked Cars</span>
                 </button>
                 <button
                   onClick={handleSignOut}
