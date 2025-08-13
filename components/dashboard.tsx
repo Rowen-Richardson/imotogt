@@ -107,16 +107,226 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
           Welcome, {user.firstName}
         </h1>
 
-        {/* Center container for the entire grid */}
-        <div className="w-full mx-auto h-full">
+        {/* MOBILE-ONLY DASHBOARD LAYOUT */}
+        <div className="block md:hidden w-full mx-auto h-full">
+          {/* First Row - 4 columns side-by-side */}
+          <div className="grid grid-cols-4 gap-2 mb-6">
+            {/* Profile Card */}
+            <div className="col-span-1" onClick={onViewProfileSettings}>
+              <Card className="rounded-lg overflow-hidden aspect-square transition-transform hover:scale-105 cursor-pointer flex flex-col justify-end">
+                <div className="relative w-full h-full">
+                  {user.profilePic ? (
+                    <Image
+                      src={user.profilePic}
+                      alt={`${user.firstName}'s profile`}
+                      layout="fill"
+                      objectFit="cover"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#2E933C] flex items-center justify-center text-white">
+                       <div className="text-center">
+                            <div className="text-xl font-bold">{user.firstName?.[0]?.toUpperCase() || "U"}</div>
+                            <div className="text-xs">{user.firstName}</div>
+                          </div>
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/70 to-transparent text-white">
+                    <h3 className="text-xs font-bold text-center">Profile</h3>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Metrics Card */}
+            <Card className="col-span-1 rounded-lg p-2 flex flex-col justify-center items-center bg-gradient-to-br from-white to-gray-50 text-center">
+               <Eye className="w-5 h-5 text-[#FF6700] mb-1" />
+               <h3 className="text-xs font-semibold text-[#3E5641]">Metrics</h3>
+            </Card>
+
+            {/* Uploads Card */}
+             <Card className="col-span-1 rounded-lg p-2 flex flex-col justify-center items-center bg-gradient-to-br from-[#FF6700] to-[#FF9248] text-white cursor-pointer hover:shadow-lg transition-all text-center" onClick={onViewUploadVehicle}>
+               <Plus className="w-5 h-5 mb-1" />
+                 <h3 className="text-xs font-semibold">Upload</h3>
+            </Card>
+
+            {/* Subscription Card */}
+            <Card className="col-span-1 rounded-lg p-2 flex flex-col justify-center items-center bg-gray-50 text-center">
+               <Package className="h-5 w-5 text-[#FF6700] mb-1" />
+                 <h3 className="text-xs font-semibold text-[#3E5641]">Sub</h3>
+            </Card>
+          </div>
+
+          {/* Saved Cars Card (Full width on mobile) */}
+          <Card className="col-span-4 rounded-3xl overflow-hidden w-full mb-6 aspect-video relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
+            <img
+              src={
+                savedCars.length > 0
+                  ? savedCars[currentCarIndex]?.image || "/placeholder.svg?height=400&width=600"
+                  : "/placeholder.svg?height=400&width=600&text=No+Saved+Cars"
+              }
+              alt={
+                savedCars.length > 0
+                  ? `${savedCars[currentCarIndex]?.make} ${savedCars[currentCarIndex]?.model}`
+                  : "No saved cars"
+              }
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+             <div className="relative z-20 h-full flex flex-col justify-between p-4">
+                <div className="flex justify-between items-start">
+                 <span
+                   onClick={() => router.push('/liked-cars-page')}
+                   className="bg-[#FF6700] text-white px-2 py-1 rounded-full text-xs cursor-pointer hover:bg-[#FF7D33] transition-colors"
+                 >
+                   View Saved Cars
+                 </span>
+                  {savedCars.length > 0 && (
+                    <span className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+                      {savedCars.length} saved cars
+                    </span>
+                  )}
+               </div>
+               <div className="flex justify-between items-end">
+                {savedCars.length > 0 ? (
+                   <>
+                     <div
+                       className="text-white cursor-pointer"
+                       onClick={() => handleViewDetails(savedCars[currentCarIndex])}
+                     >
+                       <h3 className="text-lg font-bold">
+                         {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
+                         {savedCars[currentCarIndex]?.model}
+                       </h3>
+                       <p className="text-white/80 text-xs mb-1">
+                         {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
+                       </p>
+                       <p className="text-lg font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
+                     </div>
+                      <Button
+                       className="bg-white text-[#3E5641] hover:bg-white/90 text-xs h-auto py-1.5 px-3"
+                       onClick={() => {
+                         // Open contact form or modal
+                         if (savedCars[currentCarIndex]) {
+                           window.open(
+                             `mailto:${savedCars[currentCarIndex].sellerEmail}?subject=Inquiry about your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model}&body=Hello ${savedCars[currentCarIndex].sellerName},%0D%0A%0D%0AI am interested in your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model} listed for ${savedCars[currentCarIndex].price}.%0D%0A%0D%0APlease contact me with more information.%0D%0A%0D%0AThank you.`,
+                           )
+                         }
+                       }}
+                     >
+                       Contact
+                     </Button>
+                   </>
+                 ) : (
+                   <div className="text-white text-center w-full">
+                     <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                     <h3 className="text-base font-bold mb-1">No Saved Cars</h3>
+                     <p className="text-white/80 text-xs mb-3">Save cars you're interested in to see them here</p>
+                     <Button className="bg-white text-[#3E5641] hover:bg-white/90 text-xs h-auto py-1.5 px-3" onClick={onShowAllCars}>
+                       Browse Cars
+                     </Button>
+                   </div>
+                 )}
+               </div>
+                {/* Carousel indicators */}
+                {savedCars.length > 1 && (
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                    {savedCars.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          currentCarIndex === index ? "bg-white w-3" : "bg-white/40"
+                        }`}
+                        onClick={() => setCurrentCarIndex(index)}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+          </Card>
+
+           {/* Recently Listed Cars (Full width on mobile) */}
+           <Card className="col-span-4 rounded-3xl w-full h-full flex flex-col">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Recently Listed</h3>
+                <Button variant="ghost" size="sm" className="text-[#FF6700]">
+                  View All
+                </Button>
+              </div>
+               <div className="flex-grow overflow-auto p-2">
+                 {listedCars.length > 0 ? (
+                   listedCars.map((vehicle) => (
+                     <div
+                       key={vehicle.id}
+                       className="flex items-center gap-2 p-2 mb-1 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                       onClick={() => handleViewDetails(vehicle)}
+                     >
+                       <div className="w-12 h-9 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
+                         <img
+                           src={vehicle.image || "/placeholder.svg"}
+                           alt={`${vehicle.make} ${vehicle.model}`}
+                           className="w-full h-full object-cover"
+                         />
+                       </div>
+                       <div className="flex-grow min-w-0">
+                         <div className="font-medium text-sm truncate">
+                           {vehicle.year} {vehicle.make} {vehicle.model}
+                         </div>
+                         <div className="text-xs text-gray-500">{vehicle.price}</div>
+                       </div>
+                       <div className="flex items-center ml-1">
+                         {onEditListedCar && (
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             className="flex-shrink-0 h-8 w-8"
+                             onClick={(e) => { e.stopPropagation(); onEditListedCar(vehicle); }}
+                           >
+                             <Edit className="h-3 w-3 text-blue-500" />
+                           </Button>
+                         )}
+                         {onDeleteListedCar && (
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             className="flex-shrink-0 h-8 w-8"
+                             onClick={(e) => { e.stopPropagation(); onDeleteListedCar(vehicle); }}
+                           >
+                             <Trash2 className="h-3 w-3 text-red-500" />
+                           </Button>
+                         )}
+                       </div>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="text-center text-gray-500 py-6">
+                     <Car className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                     <p className="text-sm">No cars listed yet.</p>
+                     <p className="text-xs">List your first car below!</p>
+                   </div>
+                 )}
+               </div>
+               <div className="p-3 border-t">
+                 <Button variant="outline" className="w-full text-sm" onClick={onViewUploadVehicle}>
+                   <Plus className="mr-1 h-3 w-3" />
+                   Add New Listing
+                 </Button>
+               </div>
+             </Card>
+        </div>
+
+        {/* Desktop Layout (hidden on mobile) */}
+        <div className="hidden md:block w-full mx-auto h-full">
           {/* Outer grid: 12 columns, spans full height */}
           <div className="grid grid-cols-12 gap-4 h-full">
+
             {/* LEFT COLUMN (9 of 12): uses 2-row structure */}
             <div className="col-span-9 grid grid-rows-[1fr_1fr] gap-4 h-full">
               {/* ROW 1: Profile, Progress, Vehicle Uploads */}
               <div className="grid grid-cols-3 gap-4">
-                {/* Profile Card */}
-                {/* Changed from Link to div with onClick to handle view state in parent */}
+                {/* Profile Card - Adjusted col-span for mobile */}
+                {/* Changed from Link to div with onClick to handle view state in parent. Added mobile styling */}
                 <div
                   className="col-span-1 block min-w-0"
                   onClick={onViewProfileSettings}
@@ -151,8 +361,9 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                   </Card>
                 </div>
 
-                {/* Progress Card - Enhanced metrics display */}
-                <Card className="rounded-3xl p-5 w-full h-full flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
+                {/* Progress Card - Enhanced metrics display. Adjusted col-span for mobile */}
+                {/* Added mobile styling */}
+                <Card className="col-span-1 rounded-3xl p-5 w-full h-full flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-semibold text-[#3E5641]">Listing Metrics</h3>
@@ -207,8 +418,9 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                 </Card>
 
                 {/* Vehicle Uploads Card - Transformed from Time Tracker */}
-                {/* Added onClick handler to navigate to the upload page */}
-                <Card className="rounded-3xl p-5 w-full h-full flex flex-col justify-between bg-gradient-to-br from-[#FF6700] to-[#FF9248] text-white cursor-pointer hover:shadow-lg transition-all" onClick={onViewUploadVehicle}>
+                {/* Added onClick handler to navigate to the upload page. Adjusted col-span for mobile */}
+                {/* Added mobile styling */}
+                <Card className="col-span-1 rounded-3xl p-5 w-full h-full flex flex-col justify-between bg-gradient-to-br from-[#FF6700] to-[#FF9248] text-white cursor-pointer hover:shadow-lg transition-all" onClick={onViewUploadVehicle}>
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-semibold">Vehicle Uploads</h3>
                     <Car className="w-6 h-6" />
@@ -225,10 +437,11 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                 </Card>
               </div>
 
-              {/* ROW 2: Subscription (3 columns) and Featured Car (6 columns) */}
-              <div className="grid grid-cols-9 gap-4">
+              {/* ROW 2: Subscription and Saved Cars */}
+              {/* Adjusted grid columns for mobile */}
+              <div className="grid grid-cols-12 md:grid-cols-9 gap-4 h-full">
                 {/* Subscription Card - Repurposed from Pension */}
-                <Card className="col-span-3 rounded-3xl w-full h-full flex flex-col">
+                <Card className="col-span-12 md:col-span-3 rounded-3xl w-full h-full flex flex-col"> {/* Col-span 12 on mobile */}
                   <div className="p-5 border-b">
                     <div className="flex justify-between items-center">
                       <h3 className="text-xl font-semibold">Subscription</h3>
@@ -266,8 +479,9 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
                   </div>
                 </Card>
 
-                {/* Featured Car Card - Replaces Calendar */}
-                <Card className="col-span-6 rounded-3xl overflow-hidden w-full h-full relative">
+                {/* Saved Cars Card - Replaces Calendar */}
+                {/* Adjusted col-span for mobile to match the Recently Listed Cars width */}
+                <Card className="col-span-12 md:col-span-6 rounded-3xl overflow-hidden w-full h-full relative"> {/* Col-span 12 on mobile */}
                   <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
                   <img
                     src={
@@ -360,7 +574,7 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
             </div>
 
             {/* RIGHT COLUMN (3 of 12): Recently Listed Cars */}
-            <div className="col-span-3 h-full">
+            <div className="col-span-12 md:col-span-3 h-full">
               <Card className="rounded-3xl w-full h-full flex flex-col">
                 <div className="p-5 border-b flex justify-between items-center">
                   <h3 className="text-xl font-semibold">Recently Listed Cars</h3>
@@ -435,7 +649,228 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
             </div>
           </div>
         </div>
+
+        {/* Mobile Layout (shown only on mobile) */}
+        <div className="md:hidden w-full mx-auto h-full">
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {/* Profile Card */}
+            <div className="col-span-1" onClick={onViewProfileSettings}>
+              <Card className="rounded-xl overflow-hidden aspect-square transition-transform hover:scale-105 cursor-pointer flex flex-col justify-end">
+                <div className="relative w-full h-full">
+                  {user.profilePic ? (
+                    <Image
+                      src={user.profilePic}
+                      alt={`${user.firstName}'s profile`}
+                      layout="fill"
+                      objectFit="cover"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#2E933C] flex items-center justify-center text-white">
+                       <div className="text-center">
+                            <div className="text-3xl font-bold">{user.firstName?.[0]?.toUpperCase() || "U"}</div>
+                            <div className="text-xs">{user.firstName}</div>
+                          </div>
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent text-white">
+                    <h3 className="text-sm font-bold">{user.firstName}</h3>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Metrics Card */}
+            <Card className="col-span-1 rounded-xl p-3 flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-semibold text-[#3E5641]">Metrics</h3>
+                 <Eye className="w-4 h-4 text-[#FF6700]" />
+              </div>
+                <div className="text-xl font-bold text-[#3E5641]">{totalListings}</div>
+                 <div className="text-xs text-[#6F7F69]">Total Listings</div>
+            </Card>
+
+            {/* Uploads Card */}
+             <Card className="col-span-1 rounded-xl p-3 flex flex-col justify-between bg-gradient-to-br from-[#FF6700] to-[#FF9248] text-white cursor-pointer hover:shadow-lg transition-all" onClick={onViewUploadVehicle}>
+              <div className="flex justify-between items-center mb-2">
+                 <h3 className="text-sm font-semibold">Upload</h3>
+                 <Car className="w-4 h-4" />
+               </div>
+               <div className="text-xl font-bold">List Car</div>
+               <div className="text-xs opacity-80">New listing</div>
+            </Card>
+
+            {/* Subscription Card */}
+            <Card className="col-span-1 rounded-xl p-3 flex flex-col justify-between bg-gray-50">
+              <div className="flex justify-between items-center mb-2">
+                 <h3 className="text-sm font-semibold text-[#3E5641]">Plan</h3>
+                 <Package className="h-4 w-4 text-[#FF6700]" />
+               </div>
+               <div className="text-xl font-bold text-[#3E5641]">Free</div>
+                <div className="text-xs text-[#6F7F69]">{freeListingsRemaining} left</div>
+            </Card>
+          </div>
+
+          {/* Saved Cars Card (Full width on mobile) */}
+          <Card className="col-span-4 rounded-3xl overflow-hidden w-full mb-6 aspect-video relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
+            <img
+              src={
+                savedCars.length > 0
+                  ? savedCars[currentCarIndex]?.image || "/placeholder.svg?height=400&width=600"
+                  : "/placeholder.svg?height=400&width=600&text=No+Saved+Cars"
+              }
+              alt={
+                savedCars.length > 0
+                  ? `${savedCars[currentCarIndex]?.make} ${savedCars[currentCarIndex]?.model}`
+                  : "No saved cars"
+              }
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+             <div className="relative z-20 h-full flex flex-col justify-between p-4">
+                <div className="flex justify-between items-start">
+                 <span
+                   onClick={() => router.push('/liked-cars-page')}
+                   className="bg-[#FF6700] text-white px-2 py-1 rounded-full text-xs cursor-pointer hover:bg-[#FF7D33] transition-colors"
+                 >
+                   View Saved Cars
+                 </span>
+                  {savedCars.length > 0 && (
+                    <span className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+                      {savedCars.length} saved cars
+                    </span>
+                  )}
+               </div>
+               <div className="flex justify-between items-end">
+                {savedCars.length > 0 ? (
+                   <>
+                     <div
+                       className="text-white cursor-pointer"
+                       onClick={() => handleViewDetails(savedCars[currentCarIndex])}
+                     >
+                       <h3 className="text-lg font-bold">
+                         {savedCars[currentCarIndex]?.year} {savedCars[currentCarIndex]?.make}{" "}
+                         {savedCars[currentCarIndex]?.model}
+                       </h3>
+                       <p className="text-white/80 text-xs mb-1">
+                         {savedCars[currentCarIndex]?.variant} • {savedCars[currentCarIndex]?.mileage} km
+                       </p>
+                       <p className="text-lg font-bold text-[#FF6700]">{savedCars[currentCarIndex]?.price}</p>
+                     </div>
+                      <Button
+                       className="bg-white text-[#3E5641] hover:bg-white/90 text-xs h-auto py-1.5 px-3"
+                       onClick={() => {
+                         // Open contact form or modal
+                         if (savedCars[currentCarIndex]) {
+                           window.open(
+                             `mailto:${savedCars[currentCarIndex].sellerEmail}?subject=Inquiry about your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model}&body=Hello ${savedCars[currentCarIndex].sellerName},%0D%0A%0D%0AI am interested in your ${savedCars[currentCarIndex].year} ${savedCars[currentCarIndex].make} ${savedCars[currentCarIndex].model} listed for ${savedCars[currentCarIndex].price}.%0D%0A%0D%0APlease contact me with more information.%0D%0A%0D%0AThank you.`,
+                           )
+                         }
+                       }}
+                     >
+                       Contact
+                     </Button>
+                   </>
+                 ) : (
+                   <div className="text-white text-center w-full">
+                     <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                     <h3 className="text-base font-bold mb-1">No Saved Cars</h3>
+                     <p className="text-white/80 text-xs mb-3">Save cars you're interested in to see them here</p>
+                     <Button className="bg-white text-[#3E5641] hover:bg-white/90 text-xs h-auto py-1.5 px-3" onClick={onShowAllCars}>
+                       Browse Cars
+                     </Button>
+                   </div>
+                 )}
+               </div>
+                {/* Carousel indicators */}
+                {savedCars.length > 1 && (
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                    {savedCars.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          currentCarIndex === index ? "bg-white w-3" : "bg-white/40"
+                        }`}
+                        onClick={() => setCurrentCarIndex(index)}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+          </Card>
+
+           {/* Recently Listed Cars (Full width on mobile) */}
+           <Card className="col-span-4 rounded-3xl w-full h-full flex flex-col">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Recently Listed</h3>
+                <Button variant="ghost" size="sm" className="text-[#FF6700]">
+                  View All
+                </Button>
+              </div>
+               <div className="flex-grow overflow-auto p-2">
+                 {listedCars.length > 0 ? (
+                   listedCars.map((vehicle) => (
+                     <div
+                       key={vehicle.id}
+                       className="flex items-center gap-2 p-2 mb-1 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                       onClick={() => handleViewDetails(vehicle)}
+                     >
+                       <div className="w-12 h-9 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
+                         <img
+                           src={vehicle.image || "/placeholder.svg"}
+                           alt={`${vehicle.make} ${vehicle.model}`}
+                           className="w-full h-full object-cover"
+                         />
+                       </div>
+                       <div className="flex-grow min-w-0">
+                         <div className="font-medium text-sm truncate">
+                           {vehicle.year} {vehicle.make} {vehicle.model}
+                         </div>
+                         <div className="text-xs text-gray-500">{vehicle.price}</div>
+                       </div>
+                       <div className="flex items-center ml-1">
+                         {onEditListedCar && (
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             className="flex-shrink-0 h-8 w-8"
+                             onClick={(e) => { e.stopPropagation(); onEditListedCar(vehicle); }}
+                           >
+                             <Edit className="h-3 w-3 text-blue-500" />
+                           </Button>
+                         )}
+                         {onDeleteListedCar && (
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             className="flex-shrink-0 h-8 w-8"
+                             onClick={(e) => { e.stopPropagation(); onDeleteListedCar(vehicle); }}
+                           >
+                             <Trash2 className="h-3 w-3 text-red-500" />
+                           </Button>
+                         )}
+                       </div>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="text-center text-gray-500 py-6">
+                     <Car className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                     <p className="text-sm">No cars listed yet.</p>
+                     <p className="text-xs">List your first car below!</p>
+                   </div>
+                 )}
+               </div>
+               <div className="p-3 border-t">
+                 <Button variant="outline" className="w-full text-sm" onClick={onViewUploadVehicle}>
+                   <Plus className="mr-1 h-3 w-3" />
+                   Add New Listing
+                 </Button>
+               </div>
+             </Card>
+        </div>
       </main>
     </div>
-    );
+  );
 }
+
