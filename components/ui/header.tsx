@@ -126,7 +126,7 @@ export function Header({
       <nav
         className={`
           mx-auto max-w-6xl w-[95%] rounded-full transition-all duration-300 ease-in-out
-          ${ 
+ ${
             transparent && !isScrolled ? "bg-black/20 backdrop-blur-sm" : "bg-black/90 backdrop-blur-md shadow-lg"
           } ${isMobile && isMenuOpen ? '!rounded-none w-full max-w-full' : ''}
         `}
@@ -228,29 +228,29 @@ export function Header({
         </div>
 
         {/* Mobile Menu */}
-        <div // Removed rounded-b-lg
-          className={` 
+ <div
+          className={`
             md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-black
             ${isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"}
-          `} // Added bg-black and removed rounded-b-lg
+ `}
         >
-          <div className="px-6 py-4 space-y-4 border-t border-white/10">
+ <div className="px-6 py-4 space-y-4 border-t border-white/10 h-screen flex flex-col">
             <button
               onClick={() => handleNavigation(onShowAllCars)}
-              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
+              className="block w-full text-left text-white text-lg hover:text-orange-500 transition-colors font-medium py-3"
             >
               Browse Cars
             </button>
             <button
               onClick={() => handleNavigation(onGoToSellPage)}
-              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
+              className="block w-full text-left text-white text-lg hover:text-orange-500 transition-colors font-medium py-3"
             >
               Sell Your Car
             </button>
-            <a href="/about" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+            <a href="/about" className="block text-white text-lg hover:text-orange-500 transition-colors font-medium py-3">
               About
             </a>
-            <a href="/services" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+            <a href="/services" className="block text-white text-lg hover:text-orange-500 transition-colors font-medium py-3">
               Services
             </a>
 
@@ -258,14 +258,14 @@ export function Header({
               <div className="space-y-2 pt-4 border-t border-white/10">
                 <button
                   onClick={() => handleNavigation(onDashboardClick)}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
+                  className="flex items-center space-x-2 w-full text-left text-white text-lg hover:text-orange-500 transition-colors py-3"
                 >
                   <Car className="w-4 h-4" />
                   <span>Dashboard</span>
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center space-x-2 w-full text-left text-red-400 hover:text-red-300 transition-colors py-2"
+                  className="flex items-center space-x-2 w-full text-left text-red-400 text-lg hover:text-red-300 transition-colors py-3"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>
@@ -275,7 +275,7 @@ export function Header({
               <div className="pt-4 border-t border-white/10">
                 <button
                   onClick={() => handleNavigation(onLoginClick)}
-                  className="w-full bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                  className="w-full bg-orange-500 text-white text-lg px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium"
                 >
                   Login
                 </button>
