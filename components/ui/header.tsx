@@ -193,7 +193,7 @@ export function Header({
                 </div>
               )}
               <span className="font-medium">
-                {userProfile?.firstName || currentUser?.email?.split("@")[0] || "User"}
+                {userProfile?.firstName || currentUser?.email?.split("@")[0] || "Login"}
               </span>
             </button>
           </div>
