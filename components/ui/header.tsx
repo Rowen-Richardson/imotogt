@@ -131,8 +131,8 @@ export function Header({
                 <Image
                   src="/Imoto new header.png"
                   alt="CarMarket Logo"
-                  width={120}
-                  height={48}
+                  width={320}
+                  height={320}
                   className="object-contain"
                   style={{ filter: "none" }}
                   priority
@@ -140,18 +140,9 @@ export function Header({
               </div>
 
               <div className="flex items-center space-x-2">
-                {isLoggedIn && userProfile?.profilePic && (
-                  <Image
-                    src={userProfile.profilePic || "/placeholder.svg"}
-                    alt="Profile"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                )}
                 <button
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/30 rounded-full p-2 border border-white/20"
+                  className="text-black bg-black/20 backdrop-blur-sm hover:bg-black/30 rounded-full p-2 border border-white/20"
                 >
                   <Menu size={20} />
                 </button>
