@@ -1,4 +1,5 @@
-"use client" /**base test */
+"use client"
+
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Menu, Car, Heart, Settings, LogOut, User, X } from "lucide-react"
@@ -78,7 +79,12 @@ export function Header({
   }
 
   const handleNavigation = (action: () => void) => {
-    action()
+    // If the action is specifically the onShowAllCars handler, navigate to /results
+    if (action === onShowAllCars) {
+      router.push("/results")
+    } else {
+      action()
+    }
     closeMenu()
     setShowUserMenu(false)
   }
@@ -123,32 +129,138 @@ export function Header({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-4">
-      <nav
-        className={`
-          mx-auto max-w-6xl w-[95%] rounded-full transition-all duration-300 ease-in-out
-          ${
-            transparent && !isScrolled && !isMenuOpen
-              ? "bg-black/20 backdrop-blur-sm"
-              : "bg-black/90 backdrop-blur-md shadow-lg"
-          }
-        `}
-      >
-        <div className="flex items-center justify-between px-4 py-2 bg-black text-white rounded-full">
-          {/* Logo */}
-          <div className="flex items-center">
+      <nav className="mx-auto max-w-4xl w-[95%] flex items-center justify-between">
+        {/* Left Navigation Container */}
+        <div className="hidden md:flex items-center bg-black/20 border border-white/50 backdrop-blur-sm rounded-full px-10 h-14">
+          <div className="flex items-center justify-evenly w-full gap-8">
             <button
-              onClick={() => handleNavigation(onGoHome)}
-              className="text-white text-xl font-bold hover:text-orange-500 transition-colors"
+              onClick={() => router.push("/results")} // Directly navigate to /results
+              className="text-white hover:text-orange-500 transition-colors font-medium"
             >
-              CarMarket
+              Browse
             </button>
+            <button
+              onClick={() => handleNavigation(handleSellClick)}
+              className="text-white hover:text-orange-500 transition-colors font-medium"
+            >
+              Sell
+            </button>
+            <a href="/about" className="text-white hover:text-orange-500 transition-colors font-medium">
+              About
+            </a>
+          </div>
+        </div>
+
+        {/* Logo - Centered */}
+        <div className="flex items-center justify-center flex-grow">
+          <div className="flex items-center">
+            <Image src="/Imoto new header.png" alt="CarMarket Logo" width={350} height={350} />
+          </div>
+        </div>
+
+        {/* Right Navigation & User Actions Container */}
+        <div className="hidden md:flex items-center bg-black/20 border border-white/50 backdrop-blur-sm rounded-l-[100px] rounded-r-[100px] px-8 h-14">
+          <div className="flex items-center justify-evenly w-full gap-6">
+            <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
+              Services
+            </a>
+            <a href="/contact" className="text-white hover:text-orange-500 transition-colors font-medium">
+              Contact
+            </a>
+            {currentUser ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors font-medium rounded-full px-2 py-1"
+                >
+                  {userProfile?.profilePic ? (
+                    <Image
+                      src={userProfile.profilePic || "/placeholder.svg"}
+                      alt="Profile"
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover"
+                      style={{ aspectRatio: "1/1" }}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <span className="hidden lg:inline">
+                    {userProfile?.firstName || currentUser?.email?.split("@")[0] || "User"}
+                  </span>
+                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    {userMenuItems.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => handleNavigation(item.handler)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => handleNavigation(onLoginClick)}
+                className="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-colors font-medium"
+              >
+                Login
+              </button>
+            )}
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-4">
+            {currentUser && (
+              <div className="flex items-center space-x-2">
+                {userProfile?.profilePic ? (
+                  <Image
+                    src={userProfile.profilePic || "/placeholder.svg"}
+                    alt="Profile"
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                    style={{ aspectRatio: "1/1" }}
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                )}
+              </div>
+            )}
+            <button
+              onClick={toggleMenu}
+              className="text-white hover:text-orange-500 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div // This is a duplicate mobile menu block
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? "max-h-[calc(100vh-60px)] opacity-100" : "max-h-0 opacity-0"}`}
+        >
+          <div className="px-6 py-4 space-y-4 border-t border-white/10">
             <button
               onClick={() => handleNavigation(onShowAllCars)}
-              className="text-white hover:text-orange-500 transition-colors font-medium"
+              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
             >
               Browse Cars
             </button>
@@ -161,8 +273,11 @@ export function Header({
             <a href="/about" className="text-white hover:text-orange-500 transition-colors font-medium">
               About
             </a>
-            <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
-              Services
+            <a href="/services" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+              Services {/* Add Services Link to Mobile Menu */}
+            </a>
+            <a href="/contact" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+              Contact
             </a>
           </div>
 
@@ -188,7 +303,7 @@ export function Header({
                     width={40}
                     height={40}
                     className="rounded-full object-cover border-2"
-                    style={{ aspectRatio: '1/1' }}
+                    style={{ aspectRatio: "1/1" }}
                   />
                 ) : (
                   <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
@@ -206,110 +321,6 @@ export function Header({
               >
                 Login
               </button>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
-            {currentUser && (
-              <div className="flex items-center space-x-2">
-                {userProfile?.profilePic ? (
-                  <Image
-                    src={userProfile.profilePic || "/placeholder.svg"}
-                    alt="Profile"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </div>
-            )}
-            <button
-              onClick={toggleMenu}
-              className="text-white hover:text-orange-500 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`
-            md:hidden overflow-hidden transition-all duration-300 ease-in-out
-            ${isMenuOpen ? "max-h-[calc(100vh-60px)] opacity-100" : "max-h-0 opacity-0"}
-          `}
-        >
-          <div className="px-6 py-4 space-y-4 border-t border-white/10">
-            <button
-              onClick={() => handleNavigation(onShowAllCars)}
-              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
-            >
-              Browse Cars
-            </button>
-            <button
-              onClick={() => handleNavigation(onGoToSellPage)}
-              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
-            >
-              Sell Your Car
-            </button>
-            <a href="/about" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
-              About
-            </a>
-            <a href="/services" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
-              Services
-            </a>
-
-            {currentUser ? (
-              <div className="space-y-2 pt-4 border-t border-white/10">
-                <div className="flex items-center space-x-2 text-white py-2">
-                  <span className="font-medium">
-                    {userProfile?.firstName || currentUser.email?.split("@")[0] || "User"}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleNavigation(onDashboardClick)}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Car className="w-4 h-4" />
-                  <span>Dashboard</span>
-                </button>
-                <button
-                  onClick={() => handleNavigation(() => (window.location.href = "/settings"))}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
-                </button>
-                <button
-                  onClick={() => handleNavigation(() => (window.location.href = "/liked-cars"))}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Heart className="w-4 h-4" />
-                  <span>Liked Cars</span>
-                </button>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2 w-full text-left text-red-400 hover:text-red-300 transition-colors py-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
-              </div>
-            ) : (
-              <div className="pt-4 border-t border-white/10">
-                <button
-                  onClick={() => handleNavigation(onLoginClick)}
-                  className="w-full bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium"
-                >
-                  Login
-                </button>
-              </div>
             )}
           </div>
         </div>

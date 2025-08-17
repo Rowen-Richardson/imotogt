@@ -97,8 +97,6 @@ export default function Dashboard({ user, onSignOut, onBack, savedCars = [], lis
         onGoHome={onGoHome} // Use the prop passed from CarMarketplace
         onShowAllCars={onShowAllCars} // Use the prop passed from CarMarketplace
         onGoToSellPage={onViewUploadVehicle}
-        onSignOut={onSignOut}
-        transparent={false}
       />
 
       {/* Main Content Area: Fills remaining space */}
