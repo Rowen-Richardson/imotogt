@@ -125,7 +125,7 @@ export function Header({
       <>
         {/* Mobile Header */}
         <header className="fixed top-2 left-1/2 transform -translate-x-1/2 z-50">
-          <div className="relative w-[320px] h-[50px]">
+          <div className="relative w-[320px] h-[50px] bg-black/20 border border-white/50 backdrop-blur-sm rounded-full">
             <div className="relative flex items-center justify-between w-full h-full px-6">
               <div className="flex-1 flex justify-center">
                 <Image
@@ -140,10 +140,7 @@ export function Header({
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="text-black bg-black/20 backdrop-blur-sm hover:bg-black/30 rounded-full p-2 border border-white/20"
-                >
+                <button onClick={() => setIsMobileMenuOpen(true)} className="text-black hover:text-gray-700 p-1">
                   <Menu size={20} />
                 </button>
               </div>
