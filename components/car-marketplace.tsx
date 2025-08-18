@@ -733,9 +733,9 @@ export default function CarMarketplace() {
                 {/* Display all vehicles as featured */}
                 {allVehicles.map((vehicle) => (
                   <VehicleCard
-                    key={vehicle.id}
+                    key={vehicle.id} // Using vehicle.id as key is better practice
                     vehicle={vehicle}
-                    onViewDetails={() => setSelectedVehicle(vehicle)}
+                    onViewDetails={() => router.push(`/vehicle-details/${vehicle.id}`)}
                     isSaved={savedCars.some((saved) => saved.id === vehicle.id)}
                     onToggleSave={() => handleSaveCar(vehicle)}
                     isLoggedIn={!!user}

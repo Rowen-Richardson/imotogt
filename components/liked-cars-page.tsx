@@ -11,7 +11,6 @@ import type { UserProfile } from "@/types/user"; // Import UserProfile
 interface LikedCarsPageProps {
   likedVehicles: Vehicle[];
   onBack: () => void;
-  onViewDetails: (vehicle: Vehicle) => void;
   user: UserProfile | null; // User can be a UserProfile object or null
   onSignOut?: () => void; // Add onSignOut for Header consistency
   onGoHome: () => void; // Add prop for navigating to home/search form
@@ -19,7 +18,7 @@ interface LikedCarsPageProps {
   onNavigateToUpload: () => void; // New prop to signal parent to show UploadVehicle component/view
 }
 
-export default function LikedCarsPage({ likedVehicles, onBack, onViewDetails, user, onSignOut, onGoHome, onShowAllCars, onNavigateToUpload }: LikedCarsPageProps) {
+export default function LikedCarsPage({ likedVehicles, onBack, user, onSignOut, onGoHome, onShowAllCars, onNavigateToUpload }: LikedCarsPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 

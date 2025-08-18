@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import Link from "next/link"
 import Image from "next/image"
 import { Heart } from "lucide-react"
 import type { Vehicle } from "@/types/vehicle"
@@ -52,10 +52,7 @@ export default function VehicleCard({ vehicle, onViewDetails, isSaved, onToggleS
   }
 
   return (
-    <div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col overflow-hidden group"
-      onClick={onViewDetails}
-    >
+    <Link href={`/vehicle-details/${vehicle.id}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col overflow-hidden group">
       <div className="relative h-56 w-full overflow-hidden">
         <Image
           src={(vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : vehicle.image) || "/placeholder.svg"}
@@ -88,12 +85,10 @@ export default function VehicleCard({ vehicle, onViewDetails, isSaved, onToggleS
             {vehicle.city}, {vehicle.province}
           </p>
         </div>
-        <div className="mt-auto pt-3 border-t border-gray-200 dark:border-gray-700">
-          <button className="w-full text-center font-semibold text-orange-500 hover:text-orange-600">
-            View Details
-          </button>
+        <div className="mt-auto pt-3 border-t border-gray-200 dark:border-gray-700 w-full text-center font-semibold text-orange-500 hover:text-orange-600">
+          View Details
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

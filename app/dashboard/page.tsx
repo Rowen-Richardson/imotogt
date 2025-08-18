@@ -17,7 +17,7 @@ export default function DashboardPage() {
   }, [user, loading, router])
 
   const handleViewDetails = (vehicle: Vehicle) => {
-    router.push(`/vehicle/${vehicle.id}`)
+    router.push(`/vehicle-details/${vehicle.id}`)
   }
 
   const handleEditListedCar = (vehicle: Vehicle) => {
