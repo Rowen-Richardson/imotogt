@@ -353,36 +353,51 @@ export default function UploadVehicle({
 
   const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")
-      const img = new Image()
+      try {
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
 
-      img.onload = () => {
-        // Calculate new dimensions
-        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height)
-        canvas.width = img.width * ratio
-        canvas.height = img.height * ratio
+        if (!ctx) {
+          reject(new Error("Canvas context not available"))
+          return
+        }
 
-        // Draw and compress
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const reader = new FileReader()
-              reader.onload = () => resolve(reader.result as string)
-              reader.onerror = reject
-              reader.readAsDataURL(blob)
-            } else {
-              reject(new Error("Failed to compress image"))
-            }
-          },
-          "image/jpeg",
-          quality,
-        )
+        const img = document.createElement("img") // Use createElement instead of new Image()
+
+        img.onload = () => {
+          try {
+            // Calculate new dimensions
+            const ratio = Math.min(maxWidth / img.width, maxWidth / img.height)
+            canvas.width = img.width * ratio
+            canvas.height = img.height * ratio
+
+            // Draw and compress
+            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  const reader = new FileReader()
+                  reader.onload = () => resolve(reader.result as string)
+                  reader.onerror = () => reject(new Error("Failed to read compressed image"))
+                  reader.readAsDataURL(blob)
+                } else {
+                  reject(new Error("Failed to compress image"))
+                }
+              },
+              "image/jpeg",
+              quality,
+            )
+          } catch (error) {
+            reject(new Error(`Image processing failed: ${error instanceof Error ? error.message : "Unknown error"}`))
+          }
+        }
+
+        img.onerror = () => reject(new Error("Failed to load image"))
+        img.src = URL.createObjectURL(file)
+      } catch (error) {
+        reject(new Error(`Image compression setup failed: ${error instanceof Error ? error.message : "Unknown error"}`))
       }
-
-      img.onerror = reject
-      img.src = URL.createObjectURL(file)
     })
   }
 
@@ -404,15 +419,19 @@ export default function UploadVehicle({
     try {
       const processedImages = await Promise.allSettled(
         fileArray.map(async (file, index) => {
-          if (!file.type.startsWith("image/")) {
-            throw new Error(`File "${file.name}" is not a valid image.`)
+          try {
+            if (!file.type.startsWith("image/")) {
+              throw new Error(`File "${file.name}" is not a valid image.`)
+            }
+
+            // Update progress
+            setImageUploadProgress(((index + 1) / fileArray.length) * 100)
+
+            // Compress image for faster upload with better error handling
+            return await compressImage(file, 1200, 0.85)
+          } catch (error) {
+            throw new Error(`Processing ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`)
           }
-
-          // Update progress
-          setImageUploadProgress(((index + 1) / fileArray.length) * 100)
-
-          // Compress image for faster upload
-          return await compressImage(file, 1200, 0.85)
         }),
       )
 
