@@ -440,14 +440,9 @@ export default function VehicleDetails({
       {/* Header Section with Back Button and Price */}
       <section className="px-6 pt-6 md:pt-10">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center text-[#FF6700] dark:text-[#FF7D33] hover:underline"
-          >
-            &larr; {isEditMode ? "Cancel Edit" : "Back to Listings"}
-          </button>
+
           {isEditMode ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pl-6">
               <span className="text-[#FF6700] dark:text-[#FF7D33] text-2xl md:text-3xl font-bold">$</span>
               <input
                 type="text"
@@ -578,7 +573,7 @@ export default function VehicleDetails({
                 {/* Gallery 1 */}
                 {galleryOneDisplayImages.length > 0 && (
                   <section className="gallery-section flex-shrink-0 w-full snap-center grid grid-cols-1 md:grid-cols-3 gap-4 h-[400px]">
-                    <div className="md:col-span-2 h-full overflow-hidden rounded-lg group relative">
+                    <div className="md:col-span-2 h-full overflow-hidden rounded-lg group relative m-0 p-0">
                       <Image
                         src={galleryOneDisplayImages[0] || "/placeholder.svg"}
                         alt={`${vehicle.make} ${vehicle.model} main view`}
@@ -594,10 +589,11 @@ export default function VehicleDetails({
                     </div>
                     {galleryOneDisplayImages.length > 1 && (
                       <div className="grid grid-cols-2 gap-4 h-full">
-                        {galleryOneDisplayImages.slice(1).map((imgSrc, index) => (
+                        {galleryOneDisplayImages.slice(1).map((imgSrc, index) => {
+                          return ( // Ensure we only render up to 4 small images
                           <div
                             key={`g1-thumb-${index}`}
-                            className="aspect-square overflow-hidden rounded-lg group relative h-full"
+                            className="aspect-square overflow-hidden rounded-lg group relative m-0 p-0"
                           >
                             <Image
                               src={imgSrc || "/placeholder.svg"}
@@ -612,7 +608,7 @@ export default function VehicleDetails({
                               </div>
                             </div>
                           </div>
-                        ))}
+                        )}) /* Removed extra curly brace here */}
                       </div>
                     )}
                   </section>
