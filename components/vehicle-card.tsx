@@ -46,7 +46,6 @@ export default function VehicleCard({ vehicle, onViewDetails, isSaved, onToggleS
     if (isLoggedIn) {
       onToggleSave()
     } else {
-      // Optionally, redirect to login or show a message
       alert("Please log in to save vehicles.")
     }
   }
