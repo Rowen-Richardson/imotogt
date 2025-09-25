@@ -4,7 +4,7 @@ import type React from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState, useRef, useEffect, type ElementType } from "react"
-import { ArrowLeft, Camera, Save, AlertCircle, XCircle, Edit, Check, Grip, Car, Truck, Bike } from "lucide-react"
+import { ArrowLeft, Camera, Save, AlertCircle, Edit, Check, Car, Truck, Bike } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -115,8 +115,15 @@ export default function UploadVehicle({
     bodyType: "",
     variant: "",
     description: "",
+<<<<<<< HEAD
     condition: "good",
     sellerName: profile.firstName && profile.lastName ? `${profile.firstName} ${profile.lastName}` : profile.firstName || profile.lastName || profile.email.split("@")[0],
+=======
+    sellerName:
+      profile.firstName && profile.lastName
+        ? `${profile.firstName} ${profile.lastName}`
+        : profile.firstName || profile.lastName || profile.email.split("@")[0],
+>>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
     sellerEmail: profile.email,
     sellerPhone: profile.phone || "",
     sellerSuburb: profile.suburb || "",
@@ -141,6 +148,10 @@ export default function UploadVehicle({
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
 
+  const [isProcessingImages, setIsProcessingImages] = useState(false)
+  const [imageUploadProgress, setImageUploadProgress] = useState(0)
+  const [uploadProgress, setUploadProgress] = useState(0)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const engineCapacityRef = useRef<HTMLDivElement>(null)
   const bodyTypeRef = useRef<HTMLDivElement>(null)
@@ -154,7 +165,10 @@ export default function UploadVehicle({
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      sellerName: profile.firstName && profile.lastName ? `${profile.firstName} ${profile.lastName}` : profile.firstName || profile.lastName || profile.email.split("@")[0],
+      sellerName:
+        profile.firstName && profile.lastName
+          ? `${profile.firstName} ${profile.lastName}`
+          : profile.firstName || profile.lastName || profile.email.split("@")[0],
       sellerEmail: profile.email,
       sellerPhone: profile.phone || "",
       sellerSuburb: profile.suburb || "",
@@ -264,8 +278,8 @@ export default function UploadVehicle({
     setSellerFormData(updated)
     // Auto-save to profile on every change
     try {
-      if (updateProfile) await updateProfile(updated)
-      if (onSaveProfile) await onSaveProfile(updated)
+      // if (updateProfile) await updateProfile(updated) // Commented out for testing auto-save issue
+      // if (onSaveProfile) await onSaveProfile(updated) // Commented out for testing auto-save issue
     } catch (error) {
       console.error("Failed to auto-save seller info:", error)
       setSubmitError("Failed to auto-save seller information. Please try again.")
@@ -342,44 +356,116 @@ export default function UploadVehicle({
     }
   }
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (files) {
-      const newImages: string[] = []
-      const errors: string[] = []
-      if (vehicleImages.length + files.length > 21) {
-        setSubmitError(`You can upload a maximum of 21 images. You have ${vehicleImages.length} already.`)
-        if (fileInputRef.current) fileInputRef.current.value = ""
-        return
-      }
-      Array.from(files).forEach((file) => {
-        if (!file.type.startsWith("image/")) {
-          errors.push(`File "${file.name}" is not a valid image.`)
+  const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
+
+        if (!ctx) {
+          reject(new Error("Canvas context not available"))
           return
         }
-        const reader = new FileReader()
-        reader.onload = () => {
-          if (reader.result) {
-            newImages.push(reader.result.toString())
-            if (newImages.length + vehicleImages.length === vehicleImages.length + files.length - errors.length) {
-              setVehicleImages((prevImages) => [...prevImages, ...newImages])
-              setSubmitError(errors.length > 0 ? errors.join(" ") : null)
-              if (fileInputRef.current) fileInputRef.current.value = ""
-            }
-          } else {
-            errors.push(`Failed to read file "${file.name}".`)
-            setSubmitError(errors.join(" "))
-            if (fileInputRef.current) fileInputRef.current.value = ""
+
+        const img = document.createElement("img") // Use createElement instead of new Image()
+
+        img.onload = () => {
+          try {
+            // Calculate new dimensions
+            const ratio = Math.min(maxWidth / img.width, maxWidth / img.height)
+            canvas.width = img.width * ratio
+            canvas.height = img.height * ratio
+
+            // Draw and compress
+            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  const reader = new FileReader()
+                  reader.onload = () => resolve(reader.result as string)
+                  reader.onerror = () => reject(new Error("Failed to read compressed image"))
+                  reader.readAsDataURL(blob)
+                } else {
+                  reject(new Error("Failed to compress image"))
+                }
+              },
+              "image/jpeg",
+              quality,
+            )
+          } catch (error) {
+            reject(new Error(`Image processing failed: ${error instanceof Error ? error.message : "Unknown error"}`))
           }
         }
-        reader.onerror = () => {
-          errors.push(`Failed to read file "${file.name}".`)
-          setSubmitError(errors.join(" "))
-          if (fileInputRef.current) fileInputRef.current.value = ""
+
+        img.onerror = () => reject(new Error("Failed to load image"))
+        img.src = URL.createObjectURL(file)
+      } catch (error) {
+        reject(new Error(`Image compression setup failed: ${error instanceof Error ? error.message : "Unknown error"}`))
+      }
+    })
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files) return
+
+    const fileArray = Array.from(files)
+
+    if (vehicleImages.length + fileArray.length > 21) {
+      setSubmitError(`You can upload a maximum of 21 images. You have ${vehicleImages.length} already.`)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+      return
+    }
+
+    setIsProcessingImages(true)
+    setImageUploadProgress(0)
+
+    try {
+      const processedImages = await Promise.allSettled(
+        fileArray.map(async (file, index) => {
+          try {
+            if (!file.type.startsWith("image/")) {
+              throw new Error(`File "${file.name}" is not a valid image.`)
+            }
+
+            // Update progress
+            setImageUploadProgress(((index + 1) / fileArray.length) * 100)
+
+            // Compress image for faster upload with better error handling
+            return await compressImage(file, 1200, 0.85)
+          } catch (error) {
+            throw new Error(`Processing ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`)
+          }
+        }),
+      )
+
+      const newImages: string[] = []
+      const errors: string[] = []
+
+      processedImages.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          newImages.push(result.value)
+        } else {
+          errors.push(`Failed to process ${fileArray[index].name}: ${result.reason.message}`)
         }
-        reader.readAsDataURL(file)
       })
-      setSubmitError(errors.length > 0 ? errors.join(" ") : null)
+
+      if (newImages.length > 0) {
+        setVehicleImages((prev) => [...prev, ...newImages])
+      }
+
+      if (errors.length > 0) {
+        setSubmitError(errors.join(" "))
+      } else {
+        setSubmitError(null)
+      }
+    } catch (error) {
+      setSubmitError("Failed to process images. Please try again.")
+    } finally {
+      setIsProcessingImages(false)
+      setImageUploadProgress(0)
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
   }
 
@@ -412,6 +498,7 @@ export default function UploadVehicle({
     setIsSubmitting(true)
     setSubmitError(null)
     setSubmitSuccess(null)
+    setUploadProgress(0)
 
     if (isEditingSeller) {
       setSubmitError("Please save your updated seller information before listing a vehicle.")
@@ -455,20 +542,45 @@ export default function UploadVehicle({
     }
 
     try {
+<<<<<<< HEAD
       // The vehicleData should only contain form data and images.
       // Seller information is automatically fetched on the server-side using the user's session.
       const vehicleData = { ...formData, images: vehicleImages }
 
       await onVehicleSubmit(vehicleData)
+=======
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => Math.min(prev + 10, 90))
+      }, 200)
+
+      const vehicleData = { ...formData, images: vehicleImages }
+      const vehicleDataWithSeller = {
+        ...vehicleData,
+        sellerName: formData.sellerName,
+        sellerEmail: formData.sellerEmail,
+        sellerPhone: formData.sellerPhone,
+        sellerSuburb: formData.sellerSuburb,
+        sellerCity: formData.sellerCity,
+        sellerProvince: formData.sellerProvince,
+        sellerProfilePic: formData.sellerProfilePic,
+      }
+
+      await onVehicleSubmit(vehicleDataWithSeller)
+
+      clearInterval(progressInterval)
+      setUploadProgress(100)
+
+>>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
       setSubmitSuccess("Vehicle listed successfully! Redirecting to your dashboard...")
       setTimeout(() => {
         router.push("/dashboard")
-      }, 2000)
+      }, 1500) // Reduced redirect delay for faster flow
     } catch (error) {
       console.error("Failed to submit vehicle:", error)
       setSubmitError(error instanceof Error ? error.message : String(error) || "Failed to list vehicle.")
     } finally {
       setIsSubmitting(false)
+      setUploadProgress(0)
     }
   }
 
@@ -543,6 +655,37 @@ export default function UploadVehicle({
               <AlertDescription>{submitSuccess}</AlertDescription>
             </Alert>
           )}
+
+          {isProcessingImages && (
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Processing images...</span>
+                <span className="text-sm text-blue-600 dark:text-blue-400">{Math.round(imageUploadProgress)}%</span>
+              </div>
+              <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+                <div
+                  className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${imageUploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {isSubmitting && uploadProgress > 0 && (
+            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">Uploading vehicle...</span>
+                <span className="text-sm text-green-600 dark:text-green-400">{Math.round(uploadProgress)}%</span>
+              </div>
+              <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
+                <div
+                  className="bg-green-600 dark:bg-green-400 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="lg:w-1/3 flex flex-col">
               <Card className="rounded-3xl overflow-hidden p-6 flex flex-col w-full border-[#9FA791]/20 dark:border-[#4A4D45]/20 bg-white dark:bg-[#2A352A] mb-6">
@@ -596,43 +739,23 @@ export default function UploadVehicle({
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Drag to reorder • First image is main</p>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto p-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
                       {vehicleImages.map((image, index) => (
-                        <div
-                          key={index}
-                          className={`relative aspect-square overflow-hidden rounded-lg group cursor-move ${draggedIndex === index ? "opacity-50 scale-95" : ""} ${dropTargetIndex === index ? "ring-2 ring-[#FF6700] dark:ring-[#FF7D33]" : ""}`}
-                          draggable
-                          onDragStart={() => handleDragStart(index)}
-                          onDragEnter={() => handleDragEnter(index)}
-                          onDragOver={(e) => e.preventDefault()}
-                          onDragEnd={handleDragEnd}
-                        >
-                          <div className="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 bg-black/20 transition-opacity">
-                            <Grip className="w-5 h-5 text-white" />
-                          </div>
-                          <Image
+                        <div key={index} className="relative group">
+                          <img
                             src={image || "/placeholder.svg"}
-                            alt={`Vehicle image ${index + 1}`}
-                            layout="fill"
-                            objectFit="cover"
-                            unoptimized
-                            className="object-cover"
+                            alt={`Vehicle ${index + 1}`}
+                            className="w-full h-24 sm:h-32 object-cover rounded-lg"
+                            loading="lazy" // Added lazy loading for better performance
                           />
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleRemoveImage(index)
-                            }}
-                            className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-600/90 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                            aria-label={`Remove image ${index + 1}`}
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            disabled={isSubmitting || isProcessingImages}
                           >
-                            <XCircle className="w-4 h-4" />
+                            ×
                           </button>
-                          {index === 0 && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 text-center">
-                              Main Image
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -886,7 +1009,7 @@ export default function UploadVehicle({
                           onChange={handlePriceInputChange}
                           placeholder="R 0.00"
                           className="border-[#9FA791] dark:border-[#4A4D45] focus:border-[#FF6700] dark:focus:border-[#FF7D33] focus:ring-[#FF6700] dark:focus:ring-[#FF7D33] dark:bg-[#1F2B20] dark:text-white"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || isProcessingImages}
                         />
                       </div>
                       <div className="space-y-1.5">

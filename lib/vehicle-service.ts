@@ -11,8 +11,8 @@ export const vehicleService = {
    * Fetch all vehicles with optional filters
    */
   async getVehicles(filters: any = {}): Promise<Vehicle[]> {
-    const { data, error } = await supabase
-      .from("vehicles")
+ let queryBuilder = supabase
+ .from("vehicles")
       .select(`
         *,
         users!vehicles_user_id_fkey (
@@ -28,8 +28,69 @@ export const vehicleService = {
         )
       `);
 
-    if (error) {
-      console.error("Error fetching vehicles:", error)
+ // Apply filters
+    const {
+ query,
+      minPrice,
+      maxPrice,
+      province,
+ bodyType, // This comes as an array from AdvancedFilters
+      minYear,
+      maxYear,
+      minMileage,
+      maxMileage,
+ fuelType, // This comes as an array from AdvancedFilters
+      transmission,
+      engineCapacityMin,
+      engineCapacityMax,
+    } = filters;
+
+    if (query) {
+      queryBuilder = queryBuilder.or(
+        `make.ilike.%${query}%,model.ilike.%${query}%,variant.ilike.%${query}%`,
+      );
+    }
+ if (minPrice) {
+      queryBuilder = queryBuilder.gte("price", parseFloat(minPrice));
+    }
+ if (maxPrice) {
+      queryBuilder = queryBuilder.lte("price", parseFloat(maxPrice));
+    }
+ if (province && province !== "all") {
+      queryBuilder = queryBuilder.eq("province", province);
+    }
+ if (bodyType && bodyType.length > 0) {
+      queryBuilder = queryBuilder.in("body_type", bodyType);
+    }
+ if (minYear) {
+      queryBuilder = queryBuilder.gte("year", parseInt(minYear, 10));
+    }
+ if (maxYear) {
+      queryBuilder = queryBuilder.lte("year", parseInt(maxYear, 10));
+    }
+ if (minMileage) {
+      queryBuilder = queryBuilder.gte("mileage", parseInt(minMileage, 10));
+    }
+ if (maxMileage) {
+      queryBuilder = queryBuilder.lte("mileage", parseInt(maxMileage, 10));
+    }
+ if (fuelType && fuelType.length > 0) {
+ queryBuilder = queryBuilder.in("fuel", fuelType);
+    }
+ if (transmission && transmission !== "any") {
+ queryBuilder = queryBuilder.eq("transmission", transmission);
+    }
+    // Engine capacity range filter (apply if min or max is different from default, or if both are explicitly set)
+    const minEngine = parseFloat(engineCapacityMin) || 1.0;
+    const maxEngine = parseFloat(engineCapacityMax) || 8.0;
+    if (minEngine > 1.0 || maxEngine < 8.0) {
+      queryBuilder = queryBuilder.gte("engine_capacity", minEngine).lte("engine_capacity", maxEngine);
+    }
+
+    const { data, error } = await queryBuilder;
+
+    if (error) { // Use error from the executed query
+      console.error("Supabase query error:", error);
       return []
     }
 
@@ -232,20 +293,13 @@ export const vehicleService = {
         condition: vehicleData.condition,
         location: `${userProfile.suburb || ""} ${userProfile.city || ""} ${userProfile.province || ""}`.trim(), // Derived location
         // Automatically populate seller info from the user's profile
-        seller_name: `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim(),
-        seller_email: userProfile.email,
-        seller_phone: userProfile.phone,
-        seller_suburb: userProfile.suburb,
-        seller_city: userProfile.city,
-        seller_province: userProfile.province,
-        seller_profile_pic: userProfile.profile_pic,
         status: "active",
       })
       .select() // retrieves all columns of the newly created row
       .single()
 
     if (createError || !newVehicle) {
-      console.error("Error creating vehicle record:", createError);
+      console.error("Error creating vehicle record:", createError?.message || createError);
       throw new Error("Failed to create vehicle listing in database.");
     }
 

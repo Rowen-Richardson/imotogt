@@ -118,7 +118,7 @@ export default function LoginPage({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--light-bg)] dark:bg-[var(--dark-bg)] flex flex-col">
+    <>
       <Header user={null} transparent={false} />
       <main className="flex-1 flex items-center justify-center px-4 pt-20 md:pt-24">
         <div className="w-full max-w-md">
@@ -229,9 +229,16 @@ export default function LoginPage({
                 </div>
               </div>
 
+<<<<<<< HEAD
               <div className="mt-6 grid grid-cols-1 gap-3 justify-center">
                 <Button variant="outline" onClick={() => handleOAuthSignIn("google")} disabled={isLoading}>
                   <Image src="/placeholder-logo.svg" alt="Google" width={20} height={20} />
+=======
+              <div className="mt-6">
+                <Button variant="outline" onClick={() => handleOAuthSignIn("google")} disabled={isLoading}>
+                  <Image src="/google-icon.svg" alt="Google" width={20} height={20} />
+                  <span className="ml-2">Sign in with Google</span>
+>>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
                 </Button>
               </div>
             </div>
@@ -255,6 +262,6 @@ export default function LoginPage({
           </div>
         </div>
       </main>
-    </div>
+    </>
   )
 }

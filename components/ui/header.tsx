@@ -1,10 +1,19 @@
+<<<<<<< HEAD
 "use client" /**base test */
+=======
+"use client"
+
+>>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
 import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Menu, Car, Heart, Settings, LogOut, User, X } from "lucide-react"
 import { useUser } from "@/components/UserContext"
 import { useMobile } from "@/hooks/use-mobile"
 import Image from "next/image"
+
+const FluidGlass = ({ mode, lensProps }: { mode: string; lensProps: any }) => (
+  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm" />
+)
 
 interface HeaderProps {
   user: any
@@ -28,7 +37,6 @@ export function Header({
   transparent = true,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [loginToggle, setLoginToggle] = useState(false)
@@ -39,13 +47,23 @@ export function Header({
   const isLoggedIn = !!authUser
   const isVerified = !!authUser?.email_confirmed_at
   const profile = userProfile || user
-
   const currentUser = user || authUser
+
+  const navItems = [
+    { name: "Browse", key: "browse" },
+    { name: "Sell", key: "sell" },
+    { name: "About", key: "about" },
+  ]
+
+  const rightNavItems = [
+    { name: "Services", key: "services" },
+    { name: "Contact", key: "contact" },
+  ]
 
   const handleSignOut = async () => {
     try {
       setShowUserMenu(false)
-      setIsMenuOpen(false)
+      setIsMobileMenuOpen(false)
       await contextSignOut()
       onSignOut()
     } catch (error) {
@@ -54,33 +72,38 @@ export function Header({
     }
   }
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  useEffect(() => {
-    if (!isMobile) {
-      setIsMenuOpen(false)
-    }
-  }, [isMobile])
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
-
-  const closeMenu = () => {
-    setIsMenuOpen(false)
-  }
-
-  const handleNavigation = (action: () => void) => {
-    action()
-    closeMenu()
+  const handleNavigation = (action: () => void, key: string) => {
+    setIsMobileMenuOpen(false)
     setShowUserMenu(false)
+
+    switch (key) {
+      case "browse":
+        router.push("/results")
+        break
+      case "sell":
+        handleSellClick()
+        break
+      case "about":
+        router.push("/about")
+        break
+      case "services":
+        router.push("/services")
+        break
+      case "contact":
+        router.push("/contact")
+        break
+      case "home":
+        onGoHome()
+        break
+      case "login":
+        onLoginClick()
+        break
+      case "dashboard":
+        onDashboardClick()
+        break
+      default:
+        action()
+    }
   }
 
   const handleSellClick = () => {
@@ -95,72 +118,146 @@ export function Header({
     }
   }
 
-  const getInitials = (firstName?: string, lastName?: string, email?: string) => {
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase()
-    }
-    if (firstName) {
-      return firstName.substring(0, 2).toUpperCase()
-    }
-    if (email) {
-      return email.substring(0, 2).toUpperCase()
-    }
-    return "U"
-  }
-
-  const navLinks = [
-    { href: "/home", label: "Home", handler: onGoHome },
-    { href: "/#featured", label: "All Cars", handler: onShowAllCars },
-    { href: "/about", label: "About Us" },
-    { href: "/services", label: "Services" },
-  ]
-
   const userMenuItems = [
     { label: "Dashboard", icon: Car, handler: onDashboardClick || (() => router.push("/dashboard")) },
     { label: "Saved Vehicles", icon: Heart, handler: () => router.push("/liked-cars") },
     { label: "Profile Settings", icon: Settings, handler: () => router.push("/settings") },
   ]
 
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile Header */}
+        <header className="fixed top-2 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="relative w-[320px] h-[50px] bg-black/20 border border-white/50 backdrop-blur-sm rounded-full">
+            <div className="relative flex items-center justify-between w-full h-full px-6">
+              <div className="flex-1 flex justify-center">
+                <Image
+                  src="/Imoto new header.png"
+                  alt="CarMarket Logo"
+                  width={320}
+                  height={320}
+                  className="object-contain"
+                  style={{ filter: "none" }}
+                  priority
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button onClick={() => setIsMobileMenuOpen(true)} className="text-black hover:text-gray-700 p-1">
+                  <Menu size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-[100]">
+            <div className="absolute inset-0 -z-10">
+              <FluidGlass
+                mode="lens"
+                lensProps={{
+                  scale: 1.2,
+                  ior: 1.1,
+                  thickness: 3,
+                  chromaticAberration: 0.05,
+                  anisotropy: 0.01,
+                }}
+              />
+            </div>
+            <div className="relative bg-black/80 backdrop-blur-md h-full">
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="flex justify-between items-center p-6 border-b border-white/10">
+                  <Image
+                    src="/Imoto new header.png"
+                    alt="CarMarket Logo"
+                    width={160}
+                    height={64}
+                    className="object-contain"
+                    style={{ filter: "none" }}
+                    priority
+                  />
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-white hover:bg-white/10 rounded-full p-2"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                {/* Menu Items */}
+                <div className="flex-1 flex flex-col justify-center items-center space-y-8">
+                  {[...navItems, ...rightNavItems].map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => handleNavigation(() => {}, item.key)}
+                      className="text-white text-2xl font-medium hover:text-orange-500 transition-colors"
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+
+                  {isLoggedIn ? (
+                    <div className="pt-4 space-y-4 text-center">
+                      <button
+                        onClick={() => handleNavigation(onDashboardClick, "dashboard")}
+                        className="flex items-center space-x-2 text-white text-xl hover:text-orange-500 transition-colors"
+                      >
+                        <Car className="w-5 h-5" />
+                        <span>Dashboard</span>
+                      </button>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center space-x-2 text-red-400 text-xl hover:text-red-300 transition-colors"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="pt-4">
+                      <button
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg"
+                        onClick={() => handleNavigation(onLoginClick, "login")}
+                      >
+                        Login
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    )
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-4">
-      <nav
-        className={`
-          mx-auto max-w-6xl w-[95%] rounded-full transition-all duration-300 ease-in-out
-          ${
-            transparent && !isScrolled && !isMenuOpen
-              ? "bg-black/20 backdrop-blur-sm"
-              : "bg-black/90 backdrop-blur-md shadow-lg"
-          }
-        `}
-      >
-        <div className="flex items-center justify-between px-4 py-2 bg-black text-white rounded-full">
-          {/* Logo */}
-          <div className="flex items-center">
+      <nav className="mx-auto max-w-4xl w-[95%] flex items-center justify-between">
+        {/* Left Navigation Container */}
+        <div className="hidden md:flex items-center bg-black/20 border border-white/50 backdrop-blur-sm rounded-full px-10 h-14">
+          <div className="flex items-center justify-evenly w-full gap-8">
             <button
-              onClick={() => handleNavigation(onGoHome)}
-              className="text-white text-xl font-bold hover:text-orange-500 transition-colors"
-            >
-              CarMarket
-            </button>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <button
-              onClick={() => handleNavigation(onShowAllCars)}
+              onClick={() => router.push("/results")}
               className="text-white hover:text-orange-500 transition-colors font-medium"
             >
-              Browse Cars
+              Browse
             </button>
             <button
-              onClick={() => handleNavigation(onGoToSellPage)}
+              onClick={handleSellClick}
               className="text-white hover:text-orange-500 transition-colors font-medium"
             >
-              Sell Your Car
+              Sell
             </button>
             <a href="/about" className="text-white hover:text-orange-500 transition-colors font-medium">
               About
             </a>
+<<<<<<< HEAD
             <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
               Services
             </a>
@@ -235,81 +332,83 @@ export function Header({
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+=======
+>>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={`
-            md:hidden overflow-hidden transition-all duration-300 ease-in-out
-            ${isMenuOpen ? "max-h-[calc(100vh-60px)] opacity-100" : "max-h-0 opacity-0"}
-          `}
-        >
-          <div className="px-6 py-4 space-y-4 border-t border-white/10">
-            <button
-              onClick={() => handleNavigation(onShowAllCars)}
-              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
-            >
-              Browse Cars
-            </button>
-            <button
-              onClick={() => handleNavigation(onGoToSellPage)}
-              className="block w-full text-left text-white hover:text-orange-500 transition-colors font-medium py-2"
-            >
-              Sell Your Car
-            </button>
-            <a href="/about" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
-              About
-            </a>
-            <a href="/services" className="block text-white hover:text-orange-500 transition-colors font-medium py-2">
+        {/* Logo - Centered */}
+        <div className="flex items-center justify-center flex-grow">
+          <div className="flex items-center">
+            <Image src="/Imoto new header.png" alt="CarMarket Logo" width={350} height={350} />
+          </div>
+        </div>
+
+        {/* Right Navigation & User Actions Container */}
+        <div className="hidden md:flex items-center bg-black/20 border border-white/50 backdrop-blur-sm rounded-l-[100px] rounded-r-[100px] px-8 h-14">
+          <div className="flex items-center justify-evenly w-full gap-6">
+            <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
               Services
             </a>
-
+            <a href="/contact" className="text-white hover:text-orange-500 transition-colors font-medium">
+              Contact
+            </a>
             {currentUser ? (
-              <div className="space-y-2 pt-4 border-t border-white/10">
-                <div className="flex items-center space-x-2 text-white py-2">
-                  <span className="font-medium">
-                    {userProfile?.firstName || currentUser.email?.split("@")[0] || "User"}
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors font-medium rounded-full px-2 py-1"
+                >
+                  {userProfile?.profilePic ? (
+                    <Image
+                      src={userProfile.profilePic || "/placeholder.svg"}
+                      alt="Profile"
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover"
+                      style={{ aspectRatio: "1/1" }}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <span className="hidden lg:inline">
+                    {userProfile?.firstName || currentUser?.email?.split("@")[0] || "User"}
                   </span>
-                </div>
-                <button
-                  onClick={() => handleNavigation(onDashboardClick)}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Car className="w-4 h-4" />
-                  <span>Dashboard</span>
                 </button>
-                <button
-                  onClick={() => handleNavigation(() => (window.location.href = "/settings"))}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
-                </button>
-                <button
-                  onClick={() => handleNavigation(() => (window.location.href = "/liked-cars"))}
-                  className="flex items-center space-x-2 w-full text-left text-white hover:text-orange-500 transition-colors py-2"
-                >
-                  <Heart className="w-4 h-4" />
-                  <span>Liked Cars</span>
-                </button>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2 w-full text-left text-red-400 hover:text-red-300 transition-colors py-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    {userMenuItems.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => {
+                          setShowUserMenu(false)
+                          item.handler()
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="pt-4 border-t border-white/10">
-                <button
-                  onClick={() => handleNavigation(onLoginClick)}
-                  className="w-full bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium"
-                >
-                  Login
-                </button>
-              </div>
+              <button
+                onClick={onLoginClick}
+                className="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-colors font-medium"
+              >
+                Login
+              </button>
             )}
           </div>
         </div>

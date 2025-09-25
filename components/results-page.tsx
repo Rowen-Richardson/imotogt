@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Header } from "@/components/ui/header"
 import AdvancedFilters from "@/components/advanced-filters"
@@ -9,7 +9,9 @@ import VehicleDetails from "@/components/vehicle-details"
 import { useUser } from "@/components/UserContext"
 import { vehicleService } from "@/lib/vehicle-service"
 import type { Vehicle } from "@/types/vehicle"
-import { Search } from "lucide-react"
+import { Search, SlidersHorizontal } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 export default function ResultsPage() {
   const router = useRouter()
@@ -19,6 +21,7 @@ export default function ResultsPage() {
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
   const [filters, setFilters] = useState(() => {
     const params = new URLSearchParams(searchParams)
@@ -40,6 +43,7 @@ export default function ResultsPage() {
   })
 
   useEffect(() => {
+    console.log("useEffect in ResultsPage called. Fetching vehicles with filters:", filters);
     const fetchAndSetVehicles = async () => {
       setLoading(true)
       const data = await vehicleService.getVehicles(filters) // Pass filters here
@@ -47,6 +51,7 @@ export default function ResultsPage() {
         setAllVehicles(data)
       } else {
         console.error("Error fetching vehicles:")
+        console.log("Received data:", data);
       }
       setLoading(false)
     }
@@ -102,6 +107,14 @@ export default function ResultsPage() {
     )
   }
 
+  const handleApplyMobileFilters = (newFilters: any) => {
+    handleFilterChange(newFilters)
+    setIsMobileFilterOpen(false) // Close the sheet after applying filters
+  }
+  const handleResetMobileFilters = () => {
+    handleFilterChange({}) // Reset all filters
+  }
+
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <Header user={user} {...navigationHandlers} />
@@ -114,11 +127,25 @@ export default function ResultsPage() {
           </aside>
 
           <div className="lg:col-span-3">
-            <div className="mb-6">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Search Results</h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                {loading ? "Loading vehicles..." : `${filteredVehicles.length} vehicle(s) found`}
-              </p>
+              <div className="lg:hidden flex items-center gap-2 w-full justify-between sm:justify-end">
+                {/* Moved vehicle count here for better alignment */}
+                <p className="text-gray-600 dark:text-gray-400">
+                  {loading ? "Loading vehicles..." : `${filteredVehicles.length} vehicle(s) found`}
+                </p>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 bg-orange-500 text-white hover:bg-orange-600 hover:text-white"
+                  onClick={() => setIsMobileFilterOpen(true)}
+                >
+                  <SlidersHorizontal className="h-5 w-5" /> Filters
+                </Button>
+                {/* Add a simple display of active filters here if needed */}
+                {/* {Object.keys(filters).length > 1 && ( // rudimentary check if filters are applied (excluding default query)
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{Object.keys(filters).length - 1} filters applied</span>
+                )} */}
+              </div>
             </div>
 
             {loading ? (
@@ -140,7 +167,14 @@ export default function ResultsPage() {
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}
+<<<<<<< HEAD
                     onViewDetails={() => setSelectedVehicle(vehicle)}
+=======
+                    onViewDetails={() => router.push(`/vehicle-details/${vehicle.id}`)}
+                    isSaved={savedVehicles.has(vehicle.id)}
+                    onToggleSave={() => toggleSaveVehicle(vehicle)}
+                    isLoggedIn={!!user}
+>>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
                   />
                 ))}
               </div>
@@ -155,6 +189,22 @@ export default function ResultsPage() {
             )}
           </div>
         </div>
+
+        {/* Mobile Filter Sheet */}
+        <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-sm overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filter Results</SheetTitle>
+            </SheetHeader>
+            <div className="py-4">
+              <AdvancedFilters
+                filters={filters}
+                onFilterChange={handleApplyMobileFilters} // Use a dedicated handler for mobile
+                onResetFilters={handleResetMobileFilters} // Add a reset option
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
       </main>
     </div>
   )

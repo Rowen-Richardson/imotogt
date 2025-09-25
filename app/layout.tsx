@@ -10,7 +10,7 @@ import { LikedCarsProvider } from "@/context/LikedCarsContext";
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Car Marketplace",
+  title: "Imoto GT",
   description: "Find and sell cars in your area",
     generator: 'v0.dev'
 }

@@ -207,6 +207,8 @@ export default function CarMarketplace() {
     if (fuelTypeSelect?.value && fuelTypeSelect.value !== "All") queryParams.set("fuelType", fuelTypeSelect.value)
     if (transmissionSelect?.value && transmissionSelect.value !== "All")
       queryParams.set("transmission", transmissionSelect.value)
+    queryParams.set("engineCapacityMin", engineCapacityRange[0].toFixed(1))
+    queryParams.set("engineCapacityMax", engineCapacityRange[1].toFixed(1))
 
     router.push(`/results?${queryParams.toString()}`)
   }
@@ -712,9 +714,12 @@ export default function CarMarketplace() {
                 {/* Display all vehicles as featured */}
                 {allVehicles.map((vehicle) => (
                   <VehicleCard
-                    key={vehicle.id}
+                    key={vehicle.id} // Using vehicle.id as key is better practice
                     vehicle={vehicle}
                     onViewDetails={() => setSelectedVehicle(vehicle)}
+                    isSaved={savedCars.some((saved) => saved.id === vehicle.id)}
+                    onToggleSave={() => handleSaveCar(vehicle)}
+                    isLoggedIn={!!user}
                   />
                 ))}
               </div>
