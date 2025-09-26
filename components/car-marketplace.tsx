@@ -58,6 +58,8 @@ export default function CarMarketplace() {
   const [selectedTerms, setSelectedTerms] = useState<string[]>([])
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  // Add savedCars state to track saved vehicles
+  const [savedCars, setSavedCars] = useState<Vehicle[]>([])
   const [bodyType, setBodyType] = useState("")
   const [showBodyTypes, setShowBodyTypes] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)

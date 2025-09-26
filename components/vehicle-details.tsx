@@ -5,36 +5,57 @@ import Image from "next/image" // Add this import
 
 import { Car, Shield, Phone, Mail, X, Star, UploadCloud, Search, MapPin } from "lucide-react"
 import type { Vehicle } from "@/types/vehicle"
-<<<<<<< HEAD
-import type { UserProfile } from "@/types/user";
-import { useLikedCars } from "@/context/LikedCarsContext";
-=======
-import type { UserProfile } from "@/types/user" // Added import
+import type { UserProfile } from "@/types/user"
+import { useLikedCars } from "@/context/LikedCarsContext"
+import { useUser } from "@/components/UserContext"
+import { vehicleService } from "@/lib/vehicle-service"
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react"
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
 
 interface VehicleDetailsProps {
   vehicle: Vehicle // Assumes Vehicle type now has vehicle.images?: string[]
   onBack: () => void
   user?: UserProfile // Changed 'any' to 'UserProfile'
-<<<<<<< HEAD
-  isEditMode?: boolean; // To enable editing UI
-  onUpdateVehicle?: (updatedVehicle: Vehicle) => void; // Callback to save changes
-=======
-  onSaveCar?: (vehicle: Vehicle) => void // Add callback for saving cars
+  onSaveCar?: (vehicle: Vehicle) => void // Callback for saving cars
+  onUnsaveCar?: (vehicle: Vehicle) => void // Callback for unsaving cars
   savedCars?: Vehicle[] // Add array of saved cars to check if this car is saved
   isEditMode?: boolean // To enable editing UI
   onUpdateVehicle?: (updatedVehicle: Vehicle) => void // Callback to save changes
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
 }
 
 export default function VehicleDetails({
   vehicle,
   onBack,
   user,
+  savedCars = [],
   isEditMode = false,
   onUpdateVehicle,
+  onSaveCar,
 }: VehicleDetailsProps) {
+  // Use user from context if not provided
+  const { userProfile } = useUser();
+  const effectiveUser = user || userProfile;
+  // Add handleSaveClick to toggle save or call parent callback
+  const handleSaveClick = async () => {
+    if (!effectiveUser || !effectiveUser.id || !vehicle.id) {
+      alert('Missing user or vehicle ID. Cannot save.');
+      console.error('[Save Debug] Missing user or vehicle ID.');
+      return;
+    }
+    if (!isSaved) {
+      // Save vehicle
+      if (typeof onSaveCar === 'function') {
+        await onSaveCar(vehicle);
+      }
+      console.log('[Save Debug] Vehicle saved to favorites!');
+    } else {
+      // Unsave vehicle
+      if (typeof onUnsaveCar === 'function') {
+        await onUnsaveCar(vehicle);
+      }
+      console.log('[Save Debug] Vehicle removed from favorites!');
+    }
+    // Do not setIsSaved here; rely on prop update from parent
+  }
   // DEBUG: Print the full vehicle object to check seller fields
   console.log("VehicleDetails vehicle:", vehicle)
   // Debug log
@@ -61,37 +82,33 @@ export default function VehicleDetails({
   const [message, setMessage] = useState("")
   const [isMobile, setIsMobile] = useState(false)
   const [activeTab, setActiveTab] = useState("details")
-<<<<<<< HEAD
-=======
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isSaved, setIsSaved] = useState(false)
-
+  useEffect(() => {
+    // Always sync isSaved with savedCars prop
+    setIsSaved(!!(savedCars && Array.isArray(savedCars) && savedCars.some((car) => car.id === vehicle.id)));
+  }, [savedCars, vehicle.id]);
   const [touchStartX, setTouchStartX] = useState(0)
   const [touchStartY, setTouchStartY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
-
   const nextImage = () => {
     if (allDisplayableImages.length > 0) {
       setCurrentImageIndex((prev) => (prev + 1) % allDisplayableImages.length)
     }
   }
-
   const prevImage = () => {
     if (allDisplayableImages.length > 0) {
       setCurrentImageIndex((prev) => (prev - 1 + allDisplayableImages.length) % allDisplayableImages.length)
     }
   }
-
   const toggleSave = () => {
     setIsSaved(!isSaved)
   }
-
   const openFullGallery = () => {
     setSelectedImageIndex(0)
     setIsImageModalOpen(true)
     document.body.style.overflow = "hidden"
   }
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [isZoomed, setIsZoomed] = useState(false)
@@ -162,13 +179,12 @@ export default function VehicleDetails({
   }, [vehicle, isEditMode])
 
   // Check if this vehicle is in the saved cars list
-<<<<<<< HEAD
-=======
   useEffect(() => {
     // Correctly set isSaved based on whether the vehicle is in the savedCars prop
-    setIsSaved(savedCars.some((car) => car.id === vehicle.id))
-  }, [savedCars, vehicle.id])
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
+    if (savedCars && Array.isArray(savedCars)) {
+      setIsSaved(savedCars.some((car) => car.id === vehicle.id));
+    }
+  }, [savedCars, vehicle.id]);
 
   useEffect(() => {
     setIsZoomed(false)
@@ -802,23 +818,7 @@ export default function VehicleDetails({
                 Save Changes
               </button>
             )}
-            {!isEditMode && ( // Only show sponsored and save if not in edit mode
-<<<<<<< HEAD
-            <>
-            <div className="bg-[#9FA791]/20 dark:bg-[#4A4D45]/40 px-3 py-1.5 rounded-full text-sm text-[#3E5641] dark:text-white">
-              Sponsored
-            </div>
-            <button
-              onClick={handleLikeClick}
-              className="text-[#3E5641] dark:text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1 hover:bg-[#FFF8E0] dark:hover:bg-[#2A352A] cursor-pointer"
-            >
-              <Heart
-                className={`w-4 h-4 ${isLiked ? "text-purple-600 fill-purple-600" : "text-[#FF6700] dark:text-[#FF7D33]"}`}
-              />
-              <span>{isLiked ? "Saved" : "Save"}</span>
-            </button>
-            </>
-=======
+            {!isEditMode && (
               <>
                 <div className="bg-[#9FA791]/20 dark:bg-[#4A4D45]/40 px-3 py-1.5 rounded-full text-sm text-[#3E5641] dark:text-white">
                   Sponsored
@@ -833,7 +833,6 @@ export default function VehicleDetails({
                   <span>{isSaved ? "Saved" : "Save"}</span>
                 </button>
               </>
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
             )}
           </div>
         </div>

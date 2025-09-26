@@ -8,6 +8,13 @@ type VehiclePayload = Omit<Vehicle, "id" | "createdAt" | "updatedAt" | "images">
 
 export const vehicleService = {
   /**
+   * Save a vehicle to the saved_vehicles table for a user
+   */
+
+  /**
+   * Fetch all saved vehicles for a user
+   */
+  /**
    * Fetch all vehicles with optional filters
    */
   async getVehicles(filters: any = {}): Promise<Vehicle[]> {
@@ -333,9 +340,9 @@ export const vehicleService = {
     const { data, error } = await supabase
       .from("saved_vehicles")
       .select(`
-        vehicles (
+        vehicle:vehicle_id (
           *,
-          users!vehicles_user_id_fkey (
+          users:user_id (
             id,
             first_name,
             last_name,
@@ -358,39 +365,22 @@ export const vehicleService = {
     if (!data) return [];
 
     // Transform the nested vehicle data with user info
-    return data.map(item => {
-      if (!item.vehicles) return null;
-
-      const vehicleData = item.vehicles;
-      const userData = vehicleData.users;
-
-      const {
-        user_id,
-        engine_capacity,
-        body_type,
-        seller_name,
-        seller_email,
-        seller_phone,
-        seller_profile_pic,
-        seller_suburb,
-        seller_city,
-        seller_province,
-        users,
-        ...rest
-      } = vehicleData;
-      
+    return data.map(row => {
+      const v = row.vehicle;
+      if (!v) return null;
+      const userData = v.users;
       return {
-        ...rest,
-        userId: user_id,
-        engineCapacity: engine_capacity,
-        bodyType: body_type,
-        sellerName: userData ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : seller_name || '',
-        sellerEmail: userData?.email || seller_email || '',
-        sellerPhone: userData?.phone || seller_phone || '',
-        sellerProfilePic: userData?.profile_pic || seller_profile_pic || '',
-        sellerSuburb: userData?.suburb || seller_suburb || '',
-        sellerCity: userData?.city || seller_city || '',
-        sellerProvince: userData?.province || seller_province || ''
+        ...v,
+        userId: v.user_id,
+        engineCapacity: v.engine_capacity,
+        bodyType: v.body_type,
+        sellerName: userData ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : v.seller_name || '',
+        sellerEmail: userData?.email || v.seller_email || '',
+        sellerPhone: userData?.phone || v.seller_phone || '',
+        sellerProfilePic: userData?.profile_pic || v.seller_profile_pic || '',
+        sellerSuburb: userData?.suburb || v.seller_suburb || '',
+        sellerCity: userData?.city || v.seller_city || '',
+        sellerProvince: userData?.province || v.seller_province || ''
       } as Vehicle;
     }).filter(Boolean);
   },
@@ -405,8 +395,9 @@ export const vehicleService = {
     })
 
     if (error) {
-      console.error("Error saving vehicle:", error)
-      return false
+      console.error("Error saving vehicle:", error);
+      alert('Supabase error: ' + JSON.stringify(error));
+      return false;
     }
     return true
   },

@@ -229,16 +229,10 @@ export default function LoginPage({
                 </div>
               </div>
 
-<<<<<<< HEAD
-              <div className="mt-6 grid grid-cols-1 gap-3 justify-center">
-                <Button variant="outline" onClick={() => handleOAuthSignIn("google")} disabled={isLoading}>
-                  <Image src="/placeholder-logo.svg" alt="Google" width={20} height={20} />
-=======
               <div className="mt-6">
                 <Button variant="outline" onClick={() => handleOAuthSignIn("google")} disabled={isLoading}>
                   <Image src="/google-icon.svg" alt="Google" width={20} height={20} />
                   <span className="ml-2">Sign in with Google</span>
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
                 </Button>
               </div>
             </div>

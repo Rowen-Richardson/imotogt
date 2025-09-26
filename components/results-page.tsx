@@ -167,14 +167,7 @@ export default function ResultsPage() {
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}
-<<<<<<< HEAD
                     onViewDetails={() => setSelectedVehicle(vehicle)}
-=======
-                    onViewDetails={() => router.push(`/vehicle-details/${vehicle.id}`)}
-                    isSaved={savedVehicles.has(vehicle.id)}
-                    onToggleSave={() => toggleSaveVehicle(vehicle)}
-                    isLoggedIn={!!user}
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
                   />
                 ))}
               </div>

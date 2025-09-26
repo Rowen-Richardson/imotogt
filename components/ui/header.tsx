@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-"use client" /**base test */
-=======
 "use client"
-
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Menu, Car, Heart, Settings, LogOut, User, X } from "lucide-react"
@@ -37,6 +32,10 @@ export function Header({
   transparent = true,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const toggleMenu = () => {
+    setIsMobileMenuOpen((prev) => !prev);
+  } 
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [loginToggle, setLoginToggle] = useState(false)
@@ -257,7 +256,6 @@ export function Header({
             <a href="/about" className="text-white hover:text-orange-500 transition-colors font-medium">
               About
             </a>
-<<<<<<< HEAD
             <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
               Services
             </a>
@@ -332,8 +330,6 @@ export function Header({
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-=======
->>>>>>> 261c80144a5d6af2b0a3a90645e912b994bbb2f0
           </div>
         </div>
 
