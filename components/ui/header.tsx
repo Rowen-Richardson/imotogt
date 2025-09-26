@@ -256,54 +256,10 @@ export function Header({
             <a href="/about" className="text-white hover:text-orange-500 transition-colors font-medium">
               About
             </a>
-            <a href="/services" className="text-white hover:text-orange-500 transition-colors font-medium">
-              Services
-            </a>
           </div>
 
           {/* Desktop User Actions */}
-          <div className="hidden md:flex items-center space-x-4">
-            {currentUser ? (
-              <button
-                onClick={() => {
-                  setLoginToggle((prev) => !prev)
-                  if (!loginToggle) {
-                    router.push("/dashboard")
-                  } else {
-                    router.push("/home")
-                  }
-                }}
-                className="flex items-center space-x-2 text-white hover:text-orange-500 transition-colors font-medium rounded-full px-4 py-2"
-                style={{ minWidth: 120 }}
-              >
-                {userProfile?.profilePic ? (
-                  <Image
-                    src={userProfile.profilePic || "/placeholder.svg"}
-                    alt="Profile"
-                    width={40}
-                    height={40}
-                    className="rounded-full object-cover border-2"
-                    style={{ aspectRatio: '1/1' }}
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                )}
-                <span className="font-medium">
-                  {userProfile?.firstName || currentUser?.email?.split("@")[0] || "User"}
-                </span>
-              </button>
-            ) : (
-              <button
-                onClick={() => handleNavigation(onLoginClick)}
-                className="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-colors font-medium"
-              >
-                Login
-              </button>
-            )}
-          </div>
-
+          {/* Removed Login and user profile button from left container */}
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
             {currentUser && (
@@ -349,6 +305,14 @@ export function Header({
             <a href="/contact" className="text-white hover:text-orange-500 transition-colors font-medium">
               Contact
             </a>
+            {!currentUser && (
+              <button
+                onClick={() => handleNavigation(onLoginClick)}
+                className="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-colors font-medium"
+              >
+                Login
+              </button>
+            )}
             {currentUser ? (
               <div className="relative">
                 <button

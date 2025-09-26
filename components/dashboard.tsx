@@ -89,11 +89,18 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
     return <div className="min-h-screen flex items-center justify-center text-xl">User not logged in.</div>;
   }
   // Callback to update savedCars state after save/unsave
+  const refetchSavedCars = async () => {
+    if (user && user.id) {
+      const vehicles = await vehicleService.getSavedVehiclesByUserId(user.id);
+      setSavedCars(vehicles);
+    }
+  };
+
   const handleSaveCar = async (vehicle: Vehicle) => {
     if (!user || !user.id || !vehicle.id) return;
     const success = await vehicleService.saveVehicle(user.id, vehicle.id);
     if (success) {
-      setSavedCars((prev) => [...prev, vehicle]);
+      await refetchSavedCars();
     }
   };
 
@@ -101,7 +108,7 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
     if (!user || !user.id || !vehicle.id) return;
     const success = await vehicleService.unsaveVehicle(user.id, vehicle.id);
     if (success) {
-      setSavedCars((prev) => prev.filter((car) => car.id !== vehicle.id));
+      await refetchSavedCars();
     }
   };
 
@@ -412,7 +419,11 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
                       >
                         <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                           <img
-                            src={vehicle.image || "/placeholder.svg"}
+                            src={
+                              (vehicle.images && vehicle.images.length > 0 && vehicle.images[0])
+                                || vehicle.image
+                                || "/placeholder.svg"
+                            }
                             alt={`${vehicle.make} ${vehicle.model}`}
                             className="w-full h-full object-cover"
                           />

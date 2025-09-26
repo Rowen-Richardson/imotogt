@@ -42,19 +42,22 @@ export default function VehicleDetails({
       return;
     }
     if (!isSaved) {
-      // Save vehicle
+      setPendingSave('saving');
+      setIsSaved(true); // Show instant feedback
       if (typeof onSaveCar === 'function') {
         await onSaveCar(vehicle);
       }
+      setPendingSave('none');
       console.log('[Save Debug] Vehicle saved to favorites!');
     } else {
-      // Unsave vehicle
+      setPendingSave('unsaving');
+      setIsSaved(false); // Show instant feedback
       if (typeof onUnsaveCar === 'function') {
         await onUnsaveCar(vehicle);
       }
+      setPendingSave('none');
       console.log('[Save Debug] Vehicle removed from favorites!');
     }
-    // Do not setIsSaved here; rely on prop update from parent
   }
   // DEBUG: Print the full vehicle object to check seller fields
   console.log("VehicleDetails vehicle:", vehicle)
@@ -84,6 +87,13 @@ export default function VehicleDetails({
   const [activeTab, setActiveTab] = useState("details")
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isSaved, setIsSaved] = useState(false)
+  const [pendingSave, setPendingSave] = useState<'none' | 'saving' | 'unsaving'>('none');
+  useEffect(() => {
+    // Always sync isSaved with savedCars prop unless a save/unsave is pending
+    if (pendingSave === 'none') {
+      setIsSaved(!!(savedCars && Array.isArray(savedCars) && savedCars.some((car) => car.id === vehicle.id)));
+    }
+  }, [savedCars, vehicle.id, pendingSave]);
   useEffect(() => {
     // Always sync isSaved with savedCars prop
     setIsSaved(!!(savedCars && Array.isArray(savedCars) && savedCars.some((car) => car.id === vehicle.id)));
