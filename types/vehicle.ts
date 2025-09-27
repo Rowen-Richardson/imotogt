@@ -28,4 +28,7 @@ export interface Vehicle {
   status: string
   createdAt: string
   updatedAt: string
+  is_deleted?: boolean
+  deleted_at?: string
+  delete_reason?: string
 }

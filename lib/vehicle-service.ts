@@ -18,8 +18,8 @@ export const vehicleService = {
    * Fetch all vehicles with optional filters
    */
   async getVehicles(filters: any = {}): Promise<Vehicle[]> {
- let queryBuilder = supabase
- .from("vehicles")
+    let queryBuilder = supabase
+      .from("vehicles")
       .select(`
         *,
         users!vehicles_user_id_fkey (
@@ -33,7 +33,8 @@ export const vehicleService = {
           province,
           profile_pic
         )
-      `);
+      `)
+      .eq("is_deleted", false);
 
  // Apply filters
     const {
@@ -221,7 +222,8 @@ export const vehicleService = {
           profile_pic
         )
       `)
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .eq("is_deleted", false);
 
     if (error) {
       console.error(`Error fetching vehicles for user ${userId}:`, error)
@@ -419,12 +421,21 @@ export const vehicleService = {
    * Delete a vehicle listing
    */
   async deleteVehicle(vehicleId: string): Promise<boolean> {
-    const { error } = await supabase.from("vehicles").delete().eq("id", vehicleId)
-
+    // Soft delete: set is_deleted, deleted_at, and delete_reason
+    // Accepts an optional reason argument
+    const now = new Date().toISOString();
+    // This function signature will need to be updated in the context and dashboard to accept reason
+    // For now, use a placeholder reason if not provided
+    const reason = (arguments.length > 1 && typeof arguments[1] === 'string') ? arguments[1] : 'other';
+    const { error } = await supabase.from("vehicles").update({
+      is_deleted: true,
+      deleted_at: now,
+      delete_reason: reason
+    }).eq("id", vehicleId);
     if (error) {
-      console.error("Error deleting vehicle:", error)
-      return false
+      console.error("Error soft deleting vehicle:", error);
+      return false;
     }
-    return true
+    return true;
   },
 }

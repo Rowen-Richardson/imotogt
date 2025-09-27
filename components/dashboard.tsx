@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Plus, Edit, Eye, Heart, MessageSquare, Car, Package } from "lucide-react"
 import { Trash2 } from "lucide-react" // Import the Trash2 icon
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Card } from "@/components/ui/card"
 import { Header } from "./ui/header"
 import LikedCarsPage from "@/components/liked-cars-page";
@@ -36,6 +37,50 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ user, onSignOut, onBack, listedCars = [], onViewDetails, onViewProfileSettings, onViewUploadVehicle, onEditListedCar, onDeleteListedCar, onLoginClick, onGoHome, onShowAllCars, onGoToSellPage }: DashboardProps) {
+  // State for delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
+  const [deleteReason, setDeleteReason] = useState('sold');
+  const [deleting, setDeleting] = useState(false);
+  // Delete reason options
+  const deleteReasons = [
+    { value: 'sold', label: 'Has been sold' },
+    { value: 'no_longer_selling', label: 'No longer selling' },
+    { value: 'not_interested', label: 'No longer interested in our services' },
+    { value: 'other', label: 'Other reason' },
+  ];
+
+  // Handle delete button click
+  const handleDeleteClick = (vehicle: Vehicle) => {
+    setVehicleToDelete(vehicle);
+    setDeleteDialogOpen(true);
+    setDeleteReason('sold');
+  };
+
+  // Confirm delete
+  const handleConfirmDelete = async () => {
+    if (!vehicleToDelete) return;
+    setDeleting(true);
+    // Call soft delete with reason
+    await vehicleService.deleteVehicle(vehicleToDelete.id, deleteReason);
+    setDeleting(false);
+    setDeleteDialogOpen(false);
+    setVehicleToDelete(null);
+    // Refetch listed vehicles if possible
+    if (typeof onDeleteListedCar === 'function') {
+      onDeleteListedCar(vehicleToDelete);
+    }
+    // If listedCars is managed locally, filter it here (for fallback):
+    if (Array.isArray(listedCars) && listedCars.length > 0) {
+      if (typeof setListedCars === 'function') {
+        setListedCars((prev: Vehicle[]) => prev.filter((v) => v.id !== vehicleToDelete.id));
+      }
+    }
+    // If using context, try to refresh user data
+    if (typeof window !== 'undefined' && window.location) {
+      window.location.reload(); // fallback: reload page to ensure UI updates
+    }
+  };
   // --- State and hooks ---
   const router = useRouter();
   const { likedCars } = useLikedCars();
@@ -447,16 +492,14 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
                             </Button>
                           )}
                           {/* Delete button */}
-                          {onDeleteListedCar && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="flex-shrink-0"
-                              onClick={(e) => { e.stopPropagation(); onDeleteListedCar(vehicle); }}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="flex-shrink-0"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteClick(vehicle); }}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
                         </div>
                       </div>
                     ))
@@ -672,16 +715,47 @@ export default function Dashboard({ user, onSignOut, onBack, listedCars = [], on
                             <Edit className="h-3 w-3 text-blue-500" />
                           </Button>
                         )}
-                        {onDeleteListedCar && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="flex-shrink-0 h-8 w-8"
-                            onClick={(e) => { e.stopPropagation(); onDeleteListedCar(vehicle); }}
-                          >
-                            <Trash2 className="h-3 w-3 text-red-500" />
-                          </Button>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="flex-shrink-0 h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); handleDeleteClick(vehicle); }}
+                        >
+                          <Trash2 className="h-3 w-3 text-red-500" />
+                        </Button>
+      {/* Delete Reason Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Vehicle</DialogTitle>
+          </DialogHeader>
+          <div className="mb-4">
+            <p className="mb-2">Why are you deleting this vehicle?</p>
+            <div className="space-y-2">
+              {deleteReasons.map((reason) => (
+                <label key={reason.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="deleteReason"
+                    value={reason.value}
+                    checked={deleteReason === reason.value}
+                    onChange={() => setDeleteReason(reason.value)}
+                  />
+                  <span>{reason.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
                        </div>
                      </div>
                    ))
